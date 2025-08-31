@@ -1,5 +1,6 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const nav = [
   { to: "/about", label: "About" },
@@ -16,6 +17,7 @@ export default function Header() {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const isHome = pathname === "/";
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -81,16 +83,41 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link
-            to="/contact"
-            className={
-              transparent
-                ? "hidden rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:inline-flex"
-                : "hidden rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
-            }
-          >
-            Get in touch
-          </Link>
+          {!user ? (
+            <Link
+              to="/login"
+              className={
+                transparent
+                  ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  : "rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              }
+            >
+              Login
+            </Link>
+          ) : (
+            <>
+              <Link
+                to={user.role === "admin" ? "/admin" : "/portal"}
+                className={
+                  transparent
+                    ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    : "rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                }
+              >
+                {user.role === "admin" ? "Admin" : "Portal"}
+              </Link>
+              <button
+                onClick={() => logout()}
+                className={
+                  transparent
+                    ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/90 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    : "rounded-md border px-3 py-1.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                }
+              >
+                Logout
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
