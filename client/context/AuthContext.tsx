@@ -1,73 +1,79 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { auth } from "@/lib/firebase";
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut,
-  createUserWithEmailAndPassword,
-  updateProfile,
-  User as FirebaseUser,
-} from "firebase/auth";
+import { portalUsers } from "@/data/sample";
 
-export type Role = "student" | "admin";
-export type User = { uid: string; email: string; name: string; role: Role } | null;
+export type Role = "student" | "professor" | "admin";
+export type User = { email: string; name: string; role: Role } | null;
+
+type StoredUser = { email: string; name: string; role: Role; password: string };
 
 type AuthCtx = {
   user: User;
   login: (email: string, password: string) => Promise<User>;
   signupStudent: (name: string, email: string, password: string) => Promise<User>;
-  logout: () => Promise<void>;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthCtx | undefined>(undefined);
+const KEY = "icas_auth_user";
+const USERS_KEY = "icas_users";
 
-function determineRole(u: FirebaseUser): Role {
-  const envEmails = (import.meta.env.VITE_ADMIN_EMAILS as string | undefined)?.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean) ?? [];
-  const envUids = (import.meta.env.VITE_ADMIN_UIDS as string | undefined)?.split(",").map((s) => s.trim()).filter(Boolean) ?? [];
-  const email = (u.email ?? "").toLowerCase();
-  if (envEmails.includes(email) || envUids.includes(u.uid)) return "admin";
-  return "student";
+function seedUsers(): StoredUser[] {
+  const extraAdmin: StoredUser = { email: "admin@icas.com", password: "hello123", name: "Admin", role: "admin" };
+  const seeded = [
+    ...portalUsers.map((u) => ({ ...u } as StoredUser)),
+    extraAdmin,
+  ];
+  return seeded;
+}
+
+function loadUsers(): StoredUser[] {
+  try {
+    const raw = localStorage.getItem(USERS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  const seeded = seedUsers();
+  localStorage.setItem(USERS_KEY, JSON.stringify(seeded));
+  return seeded;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User>(null);
+  const [users, setUsers] = useState<StoredUser[]>([]);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (fbUser) => {
-      if (!fbUser) {
-        setUser(null);
-        return;
-      }
-      const role = determineRole(fbUser);
-      setUser({ uid: fbUser.uid, email: fbUser.email ?? "", name: fbUser.displayName ?? fbUser.email ?? "User", role });
-    });
-    return () => unsub();
+    const u = loadUsers();
+    setUsers(u);
+    const raw = localStorage.getItem(KEY);
+    if (raw) setUser(JSON.parse(raw));
   }, []);
 
   const value = useMemo<AuthCtx>(() => ({
     user,
     async login(email, password) {
-      const cred = await signInWithEmailAndPassword(auth, email, password);
-      const fbUser = cred.user;
-      const role = determineRole(fbUser);
-      const u: User = { uid: fbUser.uid, email: fbUser.email ?? "", name: fbUser.displayName ?? fbUser.email ?? "User", role };
+      const match = users.find((u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+      if (!match) throw new Error("Invalid credentials");
+      const u = { email: match.email, name: match.name, role: match.role } as User;
       setUser(u);
+      localStorage.setItem(KEY, JSON.stringify(u));
       return u;
     },
     async signupStudent(name, email, password) {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      if (name) await updateProfile(cred.user, { displayName: name });
-      const fbUser = auth.currentUser!;
-      const role = determineRole(fbUser);
-      const u: User = { uid: fbUser.uid, email: fbUser.email ?? "", name: fbUser.displayName ?? name ?? fbUser.email ?? "User", role };
+      const exists = users.some((u) => u.email.toLowerCase() === email.toLowerCase());
+      if (exists) throw new Error("Email already registered");
+      const newUser: StoredUser = { name, email, password, role: "student" };
+      const nextUsers = [...users, newUser];
+      setUsers(nextUsers);
+      localStorage.setItem(USERS_KEY, JSON.stringify(nextUsers));
+      const u = { email, name, role: "student" } as User;
       setUser(u);
+      localStorage.setItem(KEY, JSON.stringify(u));
       return u;
     },
-    async logout() {
-      await signOut(auth);
+    logout() {
       setUser(null);
+      localStorage.removeItem(KEY);
     },
-  }), [user]);
+  }), [user, users]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
