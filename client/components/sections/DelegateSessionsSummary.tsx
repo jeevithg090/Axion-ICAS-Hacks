@@ -131,12 +131,16 @@ export default function DelegateSessionsSummary() {
         } as any,
         body: buf,
       });
+      const raw = await resp.text();
+      let parsed: any = null;
+      try {
+        parsed = raw ? JSON.parse(raw) : null;
+      } catch {}
       if (!resp.ok) {
-        const t = await resp.text();
-        throw new Error(t || `Request failed: ${resp.status}`);
+        const msg = parsed?.error || raw || `Request failed: ${resp.status}`;
+        throw new Error(msg);
       }
-      const data = (await resp.json()) as DelegateSummaryResponse;
-      setResult(data);
+      setResult(parsed as DelegateSummaryResponse);
     } catch (e: any) {
       setError(e?.message || "Failed to summarize session");
     } finally {
