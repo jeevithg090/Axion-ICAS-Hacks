@@ -107,6 +107,8 @@ export default function Portal() {
                 ))}
               </CardContent>
             </Card>
+
+            <DelegateSessionsSummary />
           </div>
 
           <div className="grid gap-6">
