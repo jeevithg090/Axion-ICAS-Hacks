@@ -1,5 +1,6 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const nav = [
   { to: "/about", label: "About" },
@@ -16,6 +17,7 @@ export default function Header() {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const isHome = pathname === "/";
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -34,25 +36,45 @@ export default function Header() {
           : "sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       }
     >
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">Skip to content</a>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
 
       {/* Topbar */}
-      <div className={`${transparent ? "text-white/90" : "text-muted-foreground"} hidden border-b/0 text-xs md:block`}>
+      <div
+        className={`${transparent ? "text-white/90" : "text-muted-foreground"} hidden border-b/0 text-xs md:block`}
+      >
         <div className="container flex h-9 items-center justify-between">
           <div className="flex items-center gap-4">
-            <a href="mailto:hello@icas.edu" className="hover:underline">hello@icas.edu</a>
-            <a href="tel:+918012345678" className="hover:underline">+91 80 1234 5678</a>
+            <a href="mailto:hello@icas.edu" className="hover:underline">
+              hello@icas.edu
+            </a>
+            <a href="tel:+918012345678" className="hover:underline">
+              +91 80 1234 5678
+            </a>
           </div>
           <div className="flex items-center gap-3">
-            <a href="#" aria-label="Facebook" className="hover:opacity-80">Fb</a>
-            <a href="#" aria-label="LinkedIn" className="hover:opacity-80">In</a>
-            <a href="#" aria-label="YouTube" className="hover:opacity-80">Yt</a>
+            <a href="#" aria-label="Facebook" className="hover:opacity-80">
+              Fb
+            </a>
+            <a href="#" aria-label="LinkedIn" className="hover:opacity-80">
+              In
+            </a>
+            <a href="#" aria-label="YouTube" className="hover:opacity-80">
+              Yt
+            </a>
           </div>
         </div>
       </div>
 
       <div className="container flex h-16 items-center justify-between gap-6">
-        <Link to="/" className={`flex items-center gap-2 font-extrabold tracking-tight ${transparent ? "text-white" : "text-primary"}`}>
+        <Link
+          to="/"
+          className={`flex items-center gap-2 font-extrabold tracking-tight ${transparent ? "text-white" : "text-primary"}`}
+        >
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F766318eacea44b40bcc70d9d860cc3ef%2Ff91793dcf37543a2b5a1a15981fd005e?format=webp&width=80"
             alt="ICAS logo"
@@ -81,16 +103,41 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <Link
-            to="/contact"
-            className={
-              transparent
-                ? "hidden rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 md:inline-flex"
-                : "hidden rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:inline-flex"
-            }
-          >
-            Get in touch
-          </Link>
+          {!user ? (
+            <Link
+              to="/login"
+              className={
+                transparent
+                  ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  : "rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              }
+            >
+              Login
+            </Link>
+          ) : (
+            <>
+              <Link
+                to={user.role === "admin" ? "/admin" : "/portal"}
+                className={
+                  transparent
+                    ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    : "rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                }
+              >
+                {user.role === "admin" ? "Admin" : "Portal"}
+              </Link>
+              <button
+                onClick={() => logout()}
+                className={
+                  transparent
+                    ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/90 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    : "rounded-md border px-3 py-1.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                }
+              >
+                Logout
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>

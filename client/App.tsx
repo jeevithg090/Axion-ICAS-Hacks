@@ -14,6 +14,7 @@ import About from "@/pages/About";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import Protected from "@/components/auth/Protected";
+import RequireRole from "@/components/auth/RequireRole";
 import Academics from "@/pages/Academics";
 import Research from "@/pages/Research";
 import StudentLife from "@/pages/StudentLife";
@@ -31,6 +32,9 @@ import Portal from "@/pages/Portal";
 import PortalCourses from "@/pages/PortalCourses";
 import PortalCourse from "@/pages/PortalCourse";
 import PortalLogin from "@/pages/PortalLogin";
+import Admin from "@/pages/Admin";
+import StudyCentre from "@/pages/StudyCentre";
+import PortalTransfer from "@/pages/PortalTransfer";
 
 const queryClient = new QueryClient();
 
@@ -44,31 +48,77 @@ const App = () => (
           <AuthProvider>
             <SiteLayout>
               <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/about" element={<About />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
 
-              <Route path="/academics" element={<Academics />} />
-              <Route path="/research" element={<Research />} />
-              <Route path="/student-life" element={<StudentLife />} />
-              <Route path="/enigma" element={<Enigma />} />
-              <Route path="/admissions-aid" element={<AdmissionsAid />} />
-              <Route path="/transfer" element={<Transfer />} />
-              <Route path="/news" element={<News />} />
-              <Route path="/events" element={<Events />} />
-              <Route path="/faculty" element={<Faculty />} />
-              <Route path="/financial-aid" element={<FinancialAid />} />
-              <Route path="/medical-aid" element={<MedicalAid />} />
-              <Route path="/impact" element={<Impact />} />
-              <Route path="/contact" element={<Contact />} />
+                <Route path="/academics" element={<Academics />} />
+                <Route path="/research" element={<Research />} />
+                <Route path="/student-life" element={<StudentLife />} />
+                <Route path="/enigma" element={<Enigma />} />
+                <Route path="/admissions-aid" element={<AdmissionsAid />} />
+                <Route path="/transfer" element={<Transfer />} />
+                <Route path="/news" element={<News />} />
+                <Route path="/events" element={<Events />} />
+                <Route path="/faculty" element={<Faculty />} />
+                <Route path="/financial-aid" element={<FinancialAid />} />
+                <Route path="/medical-aid" element={<MedicalAid />} />
+                <Route path="/impact" element={<Impact />} />
+                <Route path="/contact" element={<Contact />} />
 
-              <Route path="/login" element={<PortalLogin />} />
+                <Route path="/login" element={<PortalLogin />} />
 
-              <Route path="/portal" element={<Protected><Portal /></Protected>} />
-              <Route path="/portal/courses" element={<Protected><PortalCourses /></Protected>} />
-              <Route path="/portal/courses/:code" element={<Protected><PortalCourse /></Protected>} />
+                <Route
+                  path="/admin"
+                  element={
+                    <RequireRole role="admin">
+                      <Admin />
+                    </RequireRole>
+                  }
+                />
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+                <Route
+                  path="/portal"
+                  element={
+                    <Protected>
+                      <Portal />
+                    </Protected>
+                  }
+                />
+                <Route
+                  path="/portal/courses"
+                  element={
+                    <Protected>
+                      <PortalCourses />
+                    </Protected>
+                  }
+                />
+                <Route
+                  path="/portal/courses/:code"
+                  element={
+                    <Protected>
+                      <PortalCourse />
+                    </Protected>
+                  }
+                />
+                <Route
+                  path="/portal/study-centre"
+                  element={
+                    <Protected>
+                      <StudyCentre />
+                    </Protected>
+                  }
+                />
+                <Route
+                  path="/portal/transfer"
+                  element={
+                    <Protected>
+                      <PortalTransfer />
+                    </Protected>
+                  }
+                />
+
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </SiteLayout>
           </AuthProvider>
