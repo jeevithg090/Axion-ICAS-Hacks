@@ -22,6 +22,9 @@ export default function Portal() {
                 <a href={l.href} target={l.external ? "_blank" : undefined} rel={l.external ? "noreferrer" : undefined}>{l.label}</a>
               </Button>
             ))}
+            <Button asChild>
+              <a href="/portal/study-centre">Study Centre</a>
+            </Button>
           </div>
         </div>
 
