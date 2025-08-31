@@ -14,6 +14,7 @@ import About from "@/pages/About";
 import ThemeProvider from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/context/AuthContext";
 import Protected from "@/components/auth/Protected";
+import RequireRole from "@/components/auth/RequireRole";
 import Academics from "@/pages/Academics";
 import Research from "@/pages/Research";
 import StudentLife from "@/pages/StudentLife";
@@ -31,6 +32,7 @@ import Portal from "@/pages/Portal";
 import PortalCourses from "@/pages/PortalCourses";
 import PortalCourse from "@/pages/PortalCourse";
 import PortalLogin from "@/pages/PortalLogin";
+import Admin from "@/pages/Admin";
 
 const queryClient = new QueryClient();
 
