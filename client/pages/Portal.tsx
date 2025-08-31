@@ -12,6 +12,7 @@ import {
   portalQuickLinks,
 } from "@/data/sample";
 import { Link } from "react-router-dom";
+import DelegateSessionsSummary from "@/components/sections/DelegateSessionsSummary";
 
 export default function Portal() {
   return (
