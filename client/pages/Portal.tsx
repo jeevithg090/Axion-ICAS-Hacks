@@ -12,6 +12,7 @@ import {
   portalQuickLinks,
 } from "@/data/sample";
 import { Link } from "react-router-dom";
+import DelegateSessionsSummary from "@/components/sections/DelegateSessionsSummary";
 
 export default function Portal() {
   return (
@@ -106,6 +107,8 @@ export default function Portal() {
                 ))}
               </CardContent>
             </Card>
+
+            <DelegateSessionsSummary />
           </div>
 
           <div className="grid gap-6">
