@@ -33,6 +33,7 @@ import PortalCourses from "@/pages/PortalCourses";
 import PortalCourse from "@/pages/PortalCourse";
 import PortalLogin from "@/pages/PortalLogin";
 import Admin from "@/pages/Admin";
+import StudyCentre from "@/pages/StudyCentre";
 
 const queryClient = new QueryClient();
 
