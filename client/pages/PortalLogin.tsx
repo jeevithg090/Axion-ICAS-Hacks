@@ -70,6 +70,30 @@ export default function PortalLogin() {
             <Button type="submit" className="w-full">Create account</Button>
           </form>
         )}
+
+        <div className="mt-8 max-w-sm space-y-3">
+          <div className="text-xs text-muted-foreground">Or skip authentication:</div>
+          <div className="flex gap-2">
+            <Button variant="secondary" className="flex-1" onClick={async () => {
+              try {
+                const u = await login("student@icas.edu", "icas123");
+                const dest = next ?? (u.role === "admin" ? "/admin" : "/portal");
+                window.location.assign(dest);
+              } catch (err: any) {
+                setError(err?.message || "Failed to skip as student");
+              }
+            }}>Skip as Student</Button>
+            <Button variant="outline" className="flex-1" onClick={async () => {
+              try {
+                const u = await login("admin@icas.edu", "icas123");
+                const dest = next ?? (u.role === "admin" ? "/admin" : "/portal");
+                window.location.assign(dest);
+              } catch (err: any) {
+                setError(err?.message || "Failed to skip as admin");
+              }
+            }}>Skip as Administrator</Button>
+          </div>
+        </div>
       </section>
     </main>
   );
