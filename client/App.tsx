@@ -34,6 +34,7 @@ import PortalCourse from "@/pages/PortalCourse";
 import PortalLogin from "@/pages/PortalLogin";
 import Admin from "@/pages/Admin";
 import StudyCentre from "@/pages/StudyCentre";
+import PortalTransfer from "@/pages/PortalTransfer";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +73,7 @@ const App = () => (
               <Route path="/portal/courses" element={<Protected><PortalCourses /></Protected>} />
               <Route path="/portal/courses/:code" element={<Protected><PortalCourse /></Protected>} />
               <Route path="/portal/study-centre" element={<Protected><StudyCentre /></Protected>} />
+              <Route path="/portal/transfer" element={<Protected><PortalTransfer /></Protected>} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

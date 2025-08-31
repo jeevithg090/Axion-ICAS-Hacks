@@ -26,6 +26,9 @@ export default function Portal() {
             <Button asChild>
               <Link to="/portal/study-centre">Study Centre</Link>
             </Button>
+            <Button variant="secondary" asChild>
+              <Link to="/portal/transfer">Transfer Hub</Link>
+            </Button>
           </div>
         </div>
 

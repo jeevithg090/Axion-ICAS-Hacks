@@ -19,5 +19,7 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  app.post("/api/transfer/assistant", (await import("./routes/transfer-assistant")).handleTransferAssistant as any);
+
   return app;
 }
