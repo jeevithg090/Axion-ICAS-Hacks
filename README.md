@@ -211,45 +211,6 @@ pnpm dev
 
 ---
 
-## 📸 Screenshots & Demo
-
-### 🎯 Student Dashboard
-![Student Dashboard](docs/images/student-dashboard.png)
-*Unified hub for all student resources and transfer tracking*
-
-### 📊 Admin Analytics
-![Admin Analytics](docs/images/admin-analytics.png)
-*Comprehensive insights into student success and engagement*
-
-### 📱 Mobile Experience
-<div align="center">
-<img src="docs/images/mobile-view.png" width="300" alt="Mobile Interface">
-</div>
-
----
-
-## 🔮 Future Roadmap
-
-### 🎯 Phase 1 (Next 3 months)
-- [ ] **Third-Party Integrations**
-  - Google Calendar sync for Event Management
-  - Slack notifications for real-time updates
-  - Microsoft Teams integration for virtual events
-
-### 🎯 Phase 2 (6 months)
-- [ ] **End-to-End Transfer Concierge**
-  - Scholarship application management
-  - International housing assistance
-  - Visa application tracking
-  - University partner integrations
-
-### 🎯 Phase 3 (12 months)
-- [ ] **Advanced AI Features**
-  - Predictive analytics for student success
-  - Personalized learning recommendations
-  - Automated counseling and support
-
----
 
 
 </div>
