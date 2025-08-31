@@ -71,6 +71,7 @@ const App = () => (
               <Route path="/portal" element={<Protected><Portal /></Protected>} />
               <Route path="/portal/courses" element={<Protected><PortalCourses /></Protected>} />
               <Route path="/portal/courses/:code" element={<Protected><PortalCourse /></Protected>} />
+              <Route path="/portal/study-centre" element={<Protected><StudyCentre /></Protected>} />
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
