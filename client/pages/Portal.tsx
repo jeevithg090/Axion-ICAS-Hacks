@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Calendar } from "@/components/ui/calendar";
 import { portalCourses, portalAssignments, portalAnnouncements, portalGrades, portalQuickLinks } from "@/data/sample";
+import { Link } from "react-router-dom";
 
 export default function Portal() {
   return (
@@ -23,7 +24,7 @@ export default function Portal() {
               </Button>
             ))}
             <Button asChild>
-              <a href="/portal/study-centre">Study Centre</a>
+              <Link to="/portal/study-centre">Study Centre</Link>
             </Button>
           </div>
         </div>
