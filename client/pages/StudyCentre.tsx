@@ -2,13 +2,37 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { subscribeCourses, ensureInit, userIdFromEmail, Course, updateCourseMeta, saveSyllabus, uploadNote, subscribeUploads, Upload, saveNotes } from "@/lib/study-centre";
+import {
+  subscribeCourses,
+  ensureInit,
+  userIdFromEmail,
+  Course,
+  updateCourseMeta,
+  saveSyllabus,
+  uploadNote,
+  subscribeUploads,
+  Upload,
+  saveNotes,
+} from "@/lib/study-centre";
 import { Link } from "react-router-dom";
 
 function useStudyCourses(userEmail: string | undefined) {
@@ -27,27 +51,60 @@ function useStudyCourses(userEmail: string | undefined) {
 function FilePreview({ item }: { item: Upload }) {
   const t = (item.type || "").toLowerCase();
   if (t.startsWith("image/")) {
-    return <img src={item.url} alt={item.name} className="h-40 w-full rounded-md object-cover" />;
+    return (
+      <img
+        src={item.url}
+        alt={item.name}
+        className="h-40 w-full rounded-md object-cover"
+      />
+    );
   }
   if (t.includes("pdf")) {
     return (
-      <object data={item.url} type="application/pdf" className="h-40 w-full rounded-md">
-        <a href={item.url} className="text-sm text-primary underline" target="_blank" rel="noreferrer">Open PDF</a>
+      <object
+        data={item.url}
+        type="application/pdf"
+        className="h-40 w-full rounded-md"
+      >
+        <a
+          href={item.url}
+          className="text-sm text-primary underline"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open PDF
+        </a>
       </object>
     );
   }
-  if (item.name.toLowerCase().endsWith(".ppt") || item.name.toLowerCase().endsWith(".pptx")) {
+  if (
+    item.name.toLowerCase().endsWith(".ppt") ||
+    item.name.toLowerCase().endsWith(".pptx")
+  ) {
     const src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.url)}`;
     return <iframe src={src} className="h-40 w-full rounded-md" />;
   }
   return (
     <div className="flex h-40 w-full items-center justify-center rounded-md border text-sm">
-      <a href={item.url} className="text-primary underline" target="_blank" rel="noreferrer">Open {item.name}</a>
+      <a
+        href={item.url}
+        className="text-primary underline"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Open {item.name}
+      </a>
     </div>
   );
 }
 
-function NotesEditor({ initial, onSave }: { initial: string; onSave: (html: string) => void }) {
+function NotesEditor({
+  initial,
+  onSave,
+}: {
+  initial: string;
+  onSave: (html: string) => void;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (ref.current) ref.current.innerHTML = initial || "";
@@ -58,8 +115,17 @@ function NotesEditor({ initial, onSave }: { initial: string; onSave: (html: stri
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <Button type="button" size="sm" onClick={applyHighlight}>Highlight</Button>
-        <Button type="button" size="sm" variant="secondary" onClick={() => onSave(ref.current?.innerHTML || "")}>Save Notes</Button>
+        <Button type="button" size="sm" onClick={applyHighlight}>
+          Highlight
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant="secondary"
+          onClick={() => onSave(ref.current?.innerHTML || "")}
+        >
+          Save Notes
+        </Button>
       </div>
       <div
         ref={ref}
@@ -122,10 +188,26 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => setOpenSyllabus("view")}>View Syllabus</Button>
-          <Button size="sm" variant="secondary" onClick={() => setOpenSyllabus("add")}>Add Syllabus</Button>
-          <Button size="sm" variant="outline" onClick={() => setOpenEdit(true)}>Edit</Button>
-          <Button size="sm" variant="outline" onClick={() => setNotesOpen(true)}>Notes</Button>
+          <Button size="sm" onClick={() => setOpenSyllabus("view")}>
+            View Syllabus
+          </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => setOpenSyllabus("add")}
+          >
+            Add Syllabus
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => setOpenEdit(true)}>
+            Edit
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setNotesOpen(true)}
+          >
+            Notes
+          </Button>
         </div>
         <div className="rounded-md border p-3">
           <div className="mb-2 flex items-center justify-between">
@@ -136,7 +218,9 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
             </label>
           </div>
           <div className="grid gap-3 md:grid-cols-2">
-            {uploads.length === 0 && <div className="text-sm text-muted-foreground">No files yet.</div>}
+            {uploads.length === 0 && (
+              <div className="text-sm text-muted-foreground">No files yet.</div>
+            )}
             {uploads.map((u) => (
               <div key={u.id} className="overflow-hidden rounded-md border">
                 <FilePreview item={u} />
@@ -146,8 +230,7 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
           </div>
         </div>
       </CardContent>
-      <CardFooter className="justify-end">
-      </CardFooter>
+      <CardFooter className="justify-end"></CardFooter>
 
       {/* Edit meta */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
@@ -158,11 +241,19 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
           <div className="grid gap-3">
             <div className="grid gap-1">
               <Label htmlFor={`name-${course.id}`}>Name</Label>
-              <Input id={`name-${course.id}`} value={name} onChange={(e) => setName(e.target.value)} />
+              <Input
+                id={`name-${course.id}`}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
             <div className="grid gap-1">
               <Label htmlFor={`code-${course.id}`}>Code</Label>
-              <Input id={`code-${course.id}`} value={code} onChange={(e) => setCode(e.target.value)} />
+              <Input
+                id={`code-${course.id}`}
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+              />
             </div>
           </div>
           <DialogFooter>
@@ -172,7 +263,10 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
       </Dialog>
 
       {/* Syllabus dialogs */}
-      <Dialog open={openSyllabus === "view"} onOpenChange={(o) => setOpenSyllabus(o ? "view" : null)}>
+      <Dialog
+        open={openSyllabus === "view"}
+        onOpenChange={(o) => setOpenSyllabus(o ? "view" : null)}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Syllabus — {course.name}</DialogTitle>
@@ -183,14 +277,29 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
               <TabsTrigger value="s2">Sessional 2</TabsTrigger>
               <TabsTrigger value="s3">Sessional 3</TabsTrigger>
             </TabsList>
-            <TabsContent value="s1"><div className="whitespace-pre-wrap text-sm">{course.syllabus?.s1 || "Not added."}</div></TabsContent>
-            <TabsContent value="s2"><div className="whitespace-pre-wrap text-sm">{course.syllabus?.s2 || "Not added."}</div></TabsContent>
-            <TabsContent value="s3"><div className="whitespace-pre-wrap text-sm">{course.syllabus?.s3 || "Not added."}</div></TabsContent>
+            <TabsContent value="s1">
+              <div className="whitespace-pre-wrap text-sm">
+                {course.syllabus?.s1 || "Not added."}
+              </div>
+            </TabsContent>
+            <TabsContent value="s2">
+              <div className="whitespace-pre-wrap text-sm">
+                {course.syllabus?.s2 || "Not added."}
+              </div>
+            </TabsContent>
+            <TabsContent value="s3">
+              <div className="whitespace-pre-wrap text-sm">
+                {course.syllabus?.s3 || "Not added."}
+              </div>
+            </TabsContent>
           </Tabs>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={openSyllabus === "add"} onOpenChange={(o) => setOpenSyllabus(o ? "add" : null)}>
+      <Dialog
+        open={openSyllabus === "add"}
+        onOpenChange={(o) => setOpenSyllabus(o ? "add" : null)}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Add Syllabus — {course.name}</DialogTitle>
@@ -198,15 +307,27 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
           <div className="grid gap-3">
             <div className="grid gap-1">
               <Label>Sessional 1</Label>
-              <Textarea value={s1} onChange={(e) => setS1(e.target.value)} rows={5} />
+              <Textarea
+                value={s1}
+                onChange={(e) => setS1(e.target.value)}
+                rows={5}
+              />
             </div>
             <div className="grid gap-1">
               <Label>Sessional 2</Label>
-              <Textarea value={s2} onChange={(e) => setS2(e.target.value)} rows={5} />
+              <Textarea
+                value={s2}
+                onChange={(e) => setS2(e.target.value)}
+                rows={5}
+              />
             </div>
             <div className="grid gap-1">
               <Label>Sessional 3</Label>
-              <Textarea value={s3} onChange={(e) => setS3(e.target.value)} rows={5} />
+              <Textarea
+                value={s3}
+                onChange={(e) => setS3(e.target.value)}
+                rows={5}
+              />
             </div>
           </div>
           <DialogFooter>
@@ -221,7 +342,10 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
           <DialogHeader>
             <DialogTitle>My Notes — {course.name}</DialogTitle>
           </DialogHeader>
-          <NotesEditor initial={course.notesHtml || ""} onSave={(html) => saveNotes(userId, course.id, html)} />
+          <NotesEditor
+            initial={course.notesHtml || ""}
+            onSave={(html) => saveNotes(userId, course.id, html)}
+          />
         </DialogContent>
       </Dialog>
     </Card>
@@ -231,24 +355,35 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
 export default function StudyCentre() {
   const { user } = useAuth();
   const email = user?.email;
-  const userId = useMemo(() => (email ? userIdFromEmail(email) : undefined), [email]);
+  const userId = useMemo(
+    () => (email ? userIdFromEmail(email) : undefined),
+    [email],
+  );
   const courses = useStudyCourses(email);
 
   return (
     <main>
-      <SEO title="Study Centre — Portal" description="Upload notes, manage syllabus and study smarter." />
+      <SEO
+        title="Study Centre — Portal"
+        description="Upload notes, manage syllabus and study smarter."
+      />
       <section className="container py-10">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Study Centre</h1>
-            <p className="text-sm text-muted-foreground">Keep notes, syllabus and resources organized per course.</p>
+            <p className="text-sm text-muted-foreground">
+              Keep notes, syllabus and resources organized per course.
+            </p>
           </div>
-          <Button asChild variant="outline"><Link to="/portal">Back to Dashboard</Link></Button>
+          <Button asChild variant="outline">
+            <Link to="/portal">Back to Dashboard</Link>
+          </Button>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {userId && courses.map((c) => (
-            <CourseCard key={c.id} course={c} userId={userId} />
-          ))}
+          {userId &&
+            courses.map((c) => (
+              <CourseCard key={c.id} course={c} userId={userId} />
+            ))}
         </div>
       </section>
     </main>

@@ -36,25 +36,45 @@ export default function Header() {
           : "sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       }
     >
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground">Skip to content</a>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
 
       {/* Topbar */}
-      <div className={`${transparent ? "text-white/90" : "text-muted-foreground"} hidden border-b/0 text-xs md:block`}>
+      <div
+        className={`${transparent ? "text-white/90" : "text-muted-foreground"} hidden border-b/0 text-xs md:block`}
+      >
         <div className="container flex h-9 items-center justify-between">
           <div className="flex items-center gap-4">
-            <a href="mailto:hello@icas.edu" className="hover:underline">hello@icas.edu</a>
-            <a href="tel:+918012345678" className="hover:underline">+91 80 1234 5678</a>
+            <a href="mailto:hello@icas.edu" className="hover:underline">
+              hello@icas.edu
+            </a>
+            <a href="tel:+918012345678" className="hover:underline">
+              +91 80 1234 5678
+            </a>
           </div>
           <div className="flex items-center gap-3">
-            <a href="#" aria-label="Facebook" className="hover:opacity-80">Fb</a>
-            <a href="#" aria-label="LinkedIn" className="hover:opacity-80">In</a>
-            <a href="#" aria-label="YouTube" className="hover:opacity-80">Yt</a>
+            <a href="#" aria-label="Facebook" className="hover:opacity-80">
+              Fb
+            </a>
+            <a href="#" aria-label="LinkedIn" className="hover:opacity-80">
+              In
+            </a>
+            <a href="#" aria-label="YouTube" className="hover:opacity-80">
+              Yt
+            </a>
           </div>
         </div>
       </div>
 
       <div className="container flex h-16 items-center justify-between gap-6">
-        <Link to="/" className={`flex items-center gap-2 font-extrabold tracking-tight ${transparent ? "text-white" : "text-primary"}`}>
+        <Link
+          to="/"
+          className={`flex items-center gap-2 font-extrabold tracking-tight ${transparent ? "text-white" : "text-primary"}`}
+        >
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F766318eacea44b40bcc70d9d860cc3ef%2Ff91793dcf37543a2b5a1a15981fd005e?format=webp&width=80"
             alt="ICAS logo"

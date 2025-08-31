@@ -12,11 +12,31 @@ import {
   orderBy,
   deleteDoc,
 } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 
 export type Syllabus = { s1: string; s2: string; s3: string };
-export type Course = { id: string; code: string; name: string; syllabus: Syllabus; notesHtml?: string };
-export type Upload = { id: string; name: string; url: string; type: string; size: number; createdAt: number; docId?: string };
+export type Course = {
+  id: string;
+  code: string;
+  name: string;
+  syllabus: Syllabus;
+  notesHtml?: string;
+};
+export type Upload = {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  size: number;
+  createdAt: number;
+  docId?: string;
+};
 
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -47,13 +67,14 @@ export async function ensureInit(userId: string) {
       syllabus: { s1: "", s2: "", s3: "" },
       notesHtml: "",
     }));
-    await Promise.all(
-      defaults.map((c) => setDoc(courseDoc(userId, c.id), c))
-    );
+    await Promise.all(defaults.map((c) => setDoc(courseDoc(userId, c.id), c)));
   }
 }
 
-export function subscribeCourses(userId: string, cb: (courses: Course[]) => void) {
+export function subscribeCourses(
+  userId: string,
+  cb: (courses: Course[]) => void,
+) {
   const q = query(courseCol(userId));
   return onSnapshot(q, (snap) => {
     const list: Course[] = [];
@@ -64,19 +85,35 @@ export function subscribeCourses(userId: string, cb: (courses: Course[]) => void
   });
 }
 
-export async function updateCourseMeta(userId: string, courseId: string, data: Partial<Pick<Course, "code" | "name">>) {
+export async function updateCourseMeta(
+  userId: string,
+  courseId: string,
+  data: Partial<Pick<Course, "code" | "name">>,
+) {
   await updateDoc(courseDoc(userId, courseId), data as any);
 }
 
-export async function saveSyllabus(userId: string, courseId: string, syllabus: Syllabus) {
+export async function saveSyllabus(
+  userId: string,
+  courseId: string,
+  syllabus: Syllabus,
+) {
   await updateDoc(courseDoc(userId, courseId), { syllabus } as any);
 }
 
-export async function saveNotes(userId: string, courseId: string, notesHtml: string) {
+export async function saveNotes(
+  userId: string,
+  courseId: string,
+  notesHtml: string,
+) {
   await updateDoc(courseDoc(userId, courseId), { notesHtml } as any);
 }
 
-export function subscribeUploads(userId: string, courseId: string, cb: (items: Upload[]) => void) {
+export function subscribeUploads(
+  userId: string,
+  courseId: string,
+  cb: (items: Upload[]) => void,
+) {
   const q = query(uploadsCol(userId, courseId), orderBy("createdAt", "desc"));
   return onSnapshot(q, (snap) => {
     const list: Upload[] = [];
@@ -102,7 +139,11 @@ export async function uploadNote(userId: string, courseId: string, file: File) {
   return url;
 }
 
-export async function deleteUpload(userId: string, courseId: string, uploadId: string) {
+export async function deleteUpload(
+  userId: string,
+  courseId: string,
+  uploadId: string,
+) {
   try {
     const sref = ref(storage, uploadId);
     await deleteObject(sref);
@@ -116,7 +157,8 @@ export async function deleteUpload(userId: string, courseId: string, uploadId: s
 function inferTypeFromName(name: string) {
   const ext = name.split(".").pop()?.toLowerCase();
   if (!ext) return "application/octet-stream";
-  if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext)) return `image/${ext === "jpg" ? "jpeg" : ext}`;
+  if (["png", "jpg", "jpeg", "gif", "webp"].includes(ext))
+    return `image/${ext === "jpg" ? "jpeg" : ext}`;
   if (ext === "pdf") return "application/pdf";
   if (["ppt", "pptx"].includes(ext)) return "application/vnd.ms-powerpoint";
   if (["doc", "docx"].includes(ext)) return "application/msword";

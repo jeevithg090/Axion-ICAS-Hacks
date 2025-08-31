@@ -60,23 +60,95 @@ export function loadTransferProfile(): TransferProfile {
     gpa: 8.2,
     creditsEarned: 80,
     deadlines: [
-      { id: "dl-visa", label: "Visa Submission", due: new Date(Date.now() + 7 * 86400000).toISOString(), type: "visa" },
-      { id: "dl-tuition", label: "Tuition Fee Payment", due: new Date(Date.now() + 20 * 86400000).toISOString(), type: "tuition" },
+      {
+        id: "dl-visa",
+        label: "Visa Submission",
+        due: new Date(Date.now() + 7 * 86400000).toISOString(),
+        type: "visa",
+      },
+      {
+        id: "dl-tuition",
+        label: "Tuition Fee Payment",
+        due: new Date(Date.now() + 20 * 86400000).toISOString(),
+        type: "tuition",
+      },
     ],
     documents: [
-      { id: "doc-sem1", label: "Semester 1 Transcript", category: "academic", required: true, status: "verified" },
-      { id: "doc-sem2", label: "Semester 2 Transcript", category: "academic", required: true, status: "verified" },
-      { id: "doc-sem3", label: "Semester 3 Transcript", category: "academic", required: true, status: "uploaded" },
-      { id: "doc-sem4", label: "Semester 4 Transcript", category: "academic", required: true, status: "pending" },
-      { id: "doc-gpa", label: "Consolidated GPA Sheet", category: "academic", required: true, status: "uploaded" },
-      { id: "doc-passport", label: "Passport Copy", category: "personal", required: true, status: "verified" },
-      { id: "doc-visa-form", label: "Visa Form", category: "personal", required: true, status: "pending" },
-      { id: "doc-bank", label: "Bank Statement (6 months)", category: "financial", required: true, status: "pending" },
-      { id: "doc-affidavit", label: "Affidavit of Support", category: "financial", required: false, status: "pending" },
+      {
+        id: "doc-sem1",
+        label: "Semester 1 Transcript",
+        category: "academic",
+        required: true,
+        status: "verified",
+      },
+      {
+        id: "doc-sem2",
+        label: "Semester 2 Transcript",
+        category: "academic",
+        required: true,
+        status: "verified",
+      },
+      {
+        id: "doc-sem3",
+        label: "Semester 3 Transcript",
+        category: "academic",
+        required: true,
+        status: "uploaded",
+      },
+      {
+        id: "doc-sem4",
+        label: "Semester 4 Transcript",
+        category: "academic",
+        required: true,
+        status: "pending",
+      },
+      {
+        id: "doc-gpa",
+        label: "Consolidated GPA Sheet",
+        category: "academic",
+        required: true,
+        status: "uploaded",
+      },
+      {
+        id: "doc-passport",
+        label: "Passport Copy",
+        category: "personal",
+        required: true,
+        status: "verified",
+      },
+      {
+        id: "doc-visa-form",
+        label: "Visa Form",
+        category: "personal",
+        required: true,
+        status: "pending",
+      },
+      {
+        id: "doc-bank",
+        label: "Bank Statement (6 months)",
+        category: "financial",
+        required: true,
+        status: "pending",
+      },
+      {
+        id: "doc-affidavit",
+        label: "Affidavit of Support",
+        category: "financial",
+        required: false,
+        status: "pending",
+      },
     ],
     timeline: [
-      { id: "t1", when: new Date(Date.now() - 86_400_000 * 80).toISOString(), description: "Application submitted" },
-      { id: "t2", when: new Date(Date.now() - 86_400_000 * 50).toISOString(), description: "Passport uploaded" },
+      {
+        id: "t1",
+        when: new Date(Date.now() - 86_400_000 * 80).toISOString(),
+        description: "Application submitted",
+      },
+      {
+        id: "t2",
+        when: new Date(Date.now() - 86_400_000 * 50).toISOString(),
+        description: "Passport uploaded",
+      },
     ],
   };
   localStorage.setItem(KEY, JSON.stringify(initial));
@@ -90,7 +162,8 @@ export function saveTransferProfile(next: TransferProfile) {
 export function computeProgress(p: TransferProfile): number {
   const requiredDocs = p.documents.filter((d) => d.required);
   const docScore = requiredDocs.length
-    ? requiredDocs.filter((d) => d.status === "verified").length / requiredDocs.length
+    ? requiredDocs.filter((d) => d.status === "verified").length /
+      requiredDocs.length
     : 0;
 
   const stageWeights: Record<TransferStage, number> = {
@@ -107,21 +180,67 @@ export function computeProgress(p: TransferProfile): number {
 }
 
 export const UNIVERSITIES: UniversityInfo[] = [
-  { id: "uwisc", name: "University of Wisconsin–Madison", country: "USA", tuitionUSD: 41000, gpaCutoff: 7.8, language: "English" },
-  { id: "umn", name: "University of Minnesota – Twin Cities", country: "USA", tuitionUSD: 36000, gpaCutoff: 7.5, language: "English" },
-  { id: "swansea", name: "Swansea University", country: "UK", tuitionUSD: 29000, gpaCutoff: 7.2, language: "English" },
-  { id: "utwente", name: "University of Twente", country: "Netherlands", tuitionUSD: 15000, gpaCutoff: 7.0, language: "English" },
-  { id: "berkeley", name: "UC Berkeley", country: "USA", tuitionUSD: 48000, gpaCutoff: 9.0, language: "English" },
+  {
+    id: "uwisc",
+    name: "University of Wisconsin–Madison",
+    country: "USA",
+    tuitionUSD: 41000,
+    gpaCutoff: 7.8,
+    language: "English",
+  },
+  {
+    id: "umn",
+    name: "University of Minnesota – Twin Cities",
+    country: "USA",
+    tuitionUSD: 36000,
+    gpaCutoff: 7.5,
+    language: "English",
+  },
+  {
+    id: "swansea",
+    name: "Swansea University",
+    country: "UK",
+    tuitionUSD: 29000,
+    gpaCutoff: 7.2,
+    language: "English",
+  },
+  {
+    id: "utwente",
+    name: "University of Twente",
+    country: "Netherlands",
+    tuitionUSD: 15000,
+    gpaCutoff: 7.0,
+    language: "English",
+  },
+  {
+    id: "berkeley",
+    name: "UC Berkeley",
+    country: "USA",
+    tuitionUSD: 48000,
+    gpaCutoff: 9.0,
+    language: "English",
+  },
 ];
 
-export function checkEligibility(gpa: number, credits: number, uni: UniversityInfo) {
+export function checkEligibility(
+  gpa: number,
+  credits: number,
+  uni: UniversityInfo,
+) {
   const meetsGpa = gpa >= uni.gpaCutoff;
   const meetsCredits = credits >= 60; // baseline
   return { meetsGpa, meetsCredits, eligible: meetsGpa && meetsCredits };
 }
 
-export function addTimeline(p: TransferProfile, description: string): TransferProfile {
-  const e: TimelineEvent = { id: `e-${Date.now()}`, when: new Date().toISOString(), description };
+export function addTimeline(
+  p: TransferProfile,
+  description: string,
+): TransferProfile {
+  const e: TimelineEvent = {
+    id: `e-${Date.now()}`,
+    when: new Date().toISOString(),
+    description,
+  };
   const next = { ...p, timeline: [...p.timeline, e] };
   saveTransferProfile(next);
   return next;
@@ -132,14 +251,18 @@ export function updateDocument(
   id: string,
   patch: Partial<DocumentItem>,
 ): TransferProfile {
-  const nextDocs = p.documents.map((d) => (d.id === id ? { ...d, ...patch } : d));
+  const nextDocs = p.documents.map((d) =>
+    d.id === id ? { ...d, ...patch } : d,
+  );
   const next = { ...p, documents: nextDocs };
   saveTransferProfile(next);
   return next;
 }
 
 export function nextStep(p: TransferProfile): string {
-  const pendingDoc = p.documents.find((d) => d.required && d.status !== "verified");
+  const pendingDoc = p.documents.find(
+    (d) => d.required && d.status !== "verified",
+  );
   if (pendingDoc) return `Upload ${pendingDoc.label}`;
   switch (p.stage) {
     case "application_submitted":
@@ -155,10 +278,17 @@ export function nextStep(p: TransferProfile): string {
   }
 }
 
-export function validateFileNaming(fileName: string, item: DocumentItem): string | null {
+export function validateFileNaming(
+  fileName: string,
+  item: DocumentItem,
+): string | null {
   const lower = fileName.toLowerCase();
   if (!lower.endsWith(".pdf")) return "Only PDF files are accepted.";
-  if (item.id.includes("sem") && !/sem\s*\d/.test(lower) && !/semester\s*\d/.test(lower)) {
+  if (
+    item.id.includes("sem") &&
+    !/sem\s*\d/.test(lower) &&
+    !/semester\s*\d/.test(lower)
+  ) {
     return "Transcript must include the semester number in the filename.";
   }
   if (item.id === "doc-bank" && !/bank|statement/.test(lower)) {
