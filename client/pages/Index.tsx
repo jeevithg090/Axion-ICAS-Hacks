@@ -48,7 +48,7 @@ export default function Index() {
           alt="University campus with students"
           className="absolute inset-0 h-full w-full object-cover"
           decoding="async"
-          fetchpriority="high"
+          fetchPriority="high"
         />
         <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/40 to-black/25" />
         <div className="relative">
