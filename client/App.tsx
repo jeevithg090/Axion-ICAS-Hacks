@@ -65,6 +65,8 @@ const App = () => (
 
               <Route path="/login" element={<PortalLogin />} />
 
+              <Route path="/admin" element={<RequireRole role="admin"><Admin /></RequireRole>} />
+
               <Route path="/portal" element={<Protected><Portal /></Protected>} />
               <Route path="/portal/courses" element={<Protected><PortalCourses /></Protected>} />
               <Route path="/portal/courses/:code" element={<Protected><PortalCourse /></Protected>} />
