@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { subscribeCourses, ensureInit, userIdFromEmail, Course, updateCourseMeta, saveSyllabus, uploadNote, subscribeUploads, Upload, saveNotes } from "@/lib/study-centre";
+import { Link } from "react-router-dom";
 
 function useStudyCourses(userEmail: string | undefined) {
   const [courses, setCourses] = useState<Course[]>([]);
