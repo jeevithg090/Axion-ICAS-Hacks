@@ -242,7 +242,7 @@ export default function StudyCentre() {
             <h1 className="text-3xl font-bold tracking-tight">Study Centre</h1>
             <p className="text-sm text-muted-foreground">Keep notes, syllabus and resources organized per course.</p>
           </div>
-          <Button asChild variant="outline"><a href="/portal">Back to Dashboard</a></Button>
+          <Button asChild variant="outline"><Link to="/portal">Back to Dashboard</Link></Button>
         </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {userId && courses.map((c) => (
