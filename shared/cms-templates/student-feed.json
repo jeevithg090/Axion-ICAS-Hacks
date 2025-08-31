@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Student Feed Post",
+  "type": "object",
+  "properties": {
+    "author": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "visibility": { "type": "string", "enum": ["students", "faculty", "private"] },
+    "content": { "type": "string" },
+    "attachments": { "type": "array", "items": { "type": "string", "format": "uri" } }
+  },
+  "required": ["author", "createdAt", "visibility", "content"],
+  "additionalProperties": false
+}

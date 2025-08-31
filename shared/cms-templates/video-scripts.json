@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Student Spotlight — Innovation Hub",
+    "duration": "00:30",
+    "script": [
+      "[0-5s] Wide shot of campus. VO: 'At ICAS, ideas become impact.'",
+      "[5-12s] In-lab closeups. Student: 'My capstone is a wearable sensor for early diagnosis.'",
+      "[12-20s] Mentor cutaway. Mentor: 'We pair students with leading labs from day one.'",
+      "[20-30s] Call-to-action. VO: 'Join a global community of problem-solvers.'"
+    ]
+  },
+  {
+    "title": "Alumni Story — From Lab to Clinic",
+    "duration": "00:45",
+    "script": [
+      "[0-6s] Alumni entering clinic. VO: 'From ICAS to frontline care.'",
+      "[6-18s] Interview. Alumni: 'Our trial reduced treatment time by 30%.'",
+      "[18-32s] B-roll: team collaboration, prototypes.",
+      "[32-45s] Outro. VO: 'Advancing knowledge. Improving lives.'"
+    ]
+  }
+]

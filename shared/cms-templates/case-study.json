@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Case Study",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "summary": { "type": "string" },
+    "area": { "type": "string", "description": "e.g., Oncology, Materials" },
+    "metrics": {
+      "type": "array",
+      "items": { "type": "object", "properties": { "label": { "type": "string" }, "value": { "type": "string" } }, "required": ["label", "value"] }
+    },
+    "body": { "type": "string" },
+    "datasetUrl": { "type": "string", "format": "uri" },
+    "publicationUrl": { "type": "string", "format": "uri" }
+  },
+  "required": ["title", "summary", "area"],
+  "additionalProperties": false
+}

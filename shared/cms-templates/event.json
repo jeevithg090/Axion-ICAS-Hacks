@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Event",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "description": { "type": "string" },
+    "start": { "type": "string", "format": "date-time" },
+    "end": { "type": "string", "format": "date-time" },
+    "location": { "type": "string" },
+    "status": { "type": "string", "enum": ["upcoming", "current", "past"] },
+    "registrationUrl": { "type": "string", "format": "uri" }
+  },
+  "required": ["title", "start", "status"],
+  "additionalProperties": false
+}

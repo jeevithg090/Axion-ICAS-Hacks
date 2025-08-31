@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "News/Featured Record",
+  "type": "object",
+  "properties": {
+    "title": { "type": "string" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "summary": { "type": "string" },
+    "publishedAt": { "type": "string", "format": "date-time" },
+    "clipUrl": { "type": "string", "format": "uri" },
+    "thumbnailUrl": { "type": "string", "format": "uri" },
+    "body": { "type": "string", "description": "Markdown or HTML" },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["title", "slug", "summary", "publishedAt"],
+  "additionalProperties": false
+}
