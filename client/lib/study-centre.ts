@@ -9,15 +9,14 @@ import {
   setDoc,
   updateDoc,
   addDoc,
-  serverTimestamp,
   orderBy,
-  getDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 
 export type Syllabus = { s1: string; s2: string; s3: string };
 export type Course = { id: string; code: string; name: string; syllabus: Syllabus; notesHtml?: string };
-export type Upload = { id: string; name: string; url: string; type: string; size: number; createdAt: number };
+export type Upload = { id: string; name: string; url: string; type: string; size: number; createdAt: number; docId?: string };
 
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -91,7 +90,7 @@ export async function uploadNote(userId: string, courseId: string, file: File) {
   const sref = ref(storage, path);
   await uploadBytes(sref, file, { contentType: file.type });
   const url = await getDownloadURL(sref);
-  await addDoc(uploadsCol(userId, courseId), {
+  const dref = await addDoc(uploadsCol(userId, courseId), {
     id: path,
     name: file.name,
     url,
@@ -99,6 +98,7 @@ export async function uploadNote(userId: string, courseId: string, file: File) {
     size: file.size,
     createdAt: Date.now(),
   } satisfies Upload as any);
+  await updateDoc(dref, { docId: dref.id } as any);
   return url;
 }
 
@@ -110,7 +110,7 @@ export async function deleteUpload(userId: string, courseId: string, uploadId: s
   // We stored uploads as auto-id docs; need to find the doc with id field == uploadId and delete it
   const snap = await getDocs(uploadsCol(userId, courseId));
   const target = snap.docs.find((d) => (d.data() as Upload).id === uploadId);
-  if (target) await setDoc(target.ref, {} as any, { merge: false });
+  if (target) await deleteDoc(target.ref);
 }
 
 function inferTypeFromName(name: string) {
