@@ -27,7 +27,7 @@ export function createServer() {
   app.post(
     "/api/delegate/summary",
     express.raw({ type: "*/*", limit: "50mb" }),
-    handleDelegateSummary
+    handleDelegateSummary,
   );
 
   return app;

@@ -29,14 +29,14 @@ function SummaryView({ data }: { data: DelegateSummaryResponse }) {
       {s.title && (
         <div className="text-base font-semibold tracking-tight">{s.title}</div>
       )}
-      <Section title="Overview">
-        {s.summary}
-      </Section>
+      <Section title="Overview">{s.summary}</Section>
       {s.attendees && s.attendees.length > 0 && (
         <Section title="Attendees">
           <div className="flex flex-wrap gap-2">
             {s.attendees.map((a, i) => (
-              <Badge key={i} variant="outline">{a}</Badge>
+              <Badge key={i} variant="outline">
+                {a}
+              </Badge>
             ))}
           </div>
         </Section>
@@ -96,7 +96,8 @@ function SummaryView({ data }: { data: DelegateSummaryResponse }) {
               <li key={i}>
                 {x.timestamp ? (
                   <span className="font-medium">[{x.timestamp}]</span>
-                ) : null} {x.note}
+                ) : null}{" "}
+                {x.note}
               </li>
             ))}
           </ul>
@@ -161,7 +162,8 @@ export default function DelegateSessionsSummary() {
             onChange={(e) => setFile(e.target.files?.[0] || null)}
           />
           <div className="text-xs text-muted-foreground">
-            Upload a meeting recording (mp3, wav, m4a...). We'll transcribe and summarize it for you.
+            Upload a meeting recording (mp3, wav, m4a...). We'll transcribe and
+            summarize it for you.
           </div>
           <div className="flex gap-2">
             <Button onClick={onSubmit} disabled={!file || loading}>

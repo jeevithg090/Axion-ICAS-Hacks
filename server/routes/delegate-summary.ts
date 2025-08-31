@@ -2,27 +2,34 @@ import type { RequestHandler } from "express";
 import type { DelegateSummaryResponse, MeetingSummary } from "@shared/api";
 
 function inferFilename(contentType?: string, fallback = "audio") {
-  const ext =
-    contentType?.includes("wav") ? "wav" :
-    contentType?.includes("mp3") ? "mp3" :
-    contentType?.includes("mpeg") ? "mp3" :
-    contentType?.includes("m4a") ? "m4a" :
-    contentType?.includes("ogg") ? "ogg" :
-    contentType?.includes("webm") ? "webm" :
-    "bin";
+  const ext = contentType?.includes("wav")
+    ? "wav"
+    : contentType?.includes("mp3")
+      ? "mp3"
+      : contentType?.includes("mpeg")
+        ? "mp3"
+        : contentType?.includes("m4a")
+          ? "m4a"
+          : contentType?.includes("ogg")
+            ? "ogg"
+            : contentType?.includes("webm")
+              ? "webm"
+              : "bin";
   return `${fallback}.${ext}`;
 }
 
 async function transcribeWithElevenLabs(
   audio: Buffer,
   contentType: string,
-  filename: string
+  filename: string,
 ): Promise<{ text: string } & Record<string, any>> {
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) throw new Error("ELEVENLABS_API_KEY is not set");
 
   const fd = new FormData();
-  const blob = new Blob([audio], { type: contentType || "application/octet-stream" });
+  const blob = new Blob([audio], {
+    type: contentType || "application/octet-stream",
+  });
   fd.append("model_id", "scribe_v1");
   fd.append("language_code", "en");
   fd.append("tag_audio_events", "true");
@@ -64,24 +71,27 @@ async function summarizeWithOpenRouter(transcript: string) {
   let lastErr: any = null;
   for (const model of models) {
     try {
-      const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key}`,
-          "HTTP-Referer": "https://builder.io",
-          "X-Title": "ICAS Delegate Sessions Summary",
+      const resp = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${key}`,
+            "HTTP-Referer": "https://builder.io",
+            "X-Title": "ICAS Delegate Sessions Summary",
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: system },
+              { role: "user", content: user },
+            ],
+            temperature: 0.2,
+            max_tokens: 1200,
+          }),
         },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: system },
-            { role: "user", content: user },
-          ],
-          temperature: 0.2,
-          max_tokens: 1200,
-        }),
-      });
+      );
       if (!resp.ok) {
         lastErr = new Error(`OpenRouter ${model} HTTP ${resp.status}`);
         continue;
@@ -113,16 +123,27 @@ async function summarizeWithOpenRouter(transcript: string) {
 
 export const handleDelegateSummary: RequestHandler = async (req, res) => {
   try {
-    const contentType = (req.headers["content-type"] as string) || "application/octet-stream";
-    const filename = (req.headers["x-filename"] as string) || inferFilename(contentType, "meeting");
+    const contentType =
+      (req.headers["content-type"] as string) || "application/octet-stream";
+    const filename =
+      (req.headers["x-filename"] as string) ||
+      inferFilename(contentType, "meeting");
 
     if (!Buffer.isBuffer(req.body) || !req.body.length) {
-      return res.status(400).json({ error: "Audio file required (binary body)." });
+      return res
+        .status(400)
+        .json({ error: "Audio file required (binary body)." });
     }
 
-    const stt = await transcribeWithElevenLabs(req.body as Buffer, contentType, filename);
+    const stt = await transcribeWithElevenLabs(
+      req.body as Buffer,
+      contentType,
+      filename,
+    );
 
-    const { model, content, parsed } = await summarizeWithOpenRouter(stt.text || "");
+    const { model, content, parsed } = await summarizeWithOpenRouter(
+      stt.text || "",
+    );
 
     const payload: DelegateSummaryResponse = {
       transcript: stt.text || "",
