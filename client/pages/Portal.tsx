@@ -31,7 +31,7 @@ export default function Portal() {
               Dashboard overview for your courses.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {portalQuickLinks.map((l) => (
               <Button key={l.label} asChild variant={l.variant as any}>
                 <a
@@ -48,6 +48,15 @@ export default function Portal() {
             </Button>
             <Button variant="secondary" asChild>
               <Link to="/portal/transfer">Transfer Hub</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/portal/planner">Academic Planner</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/portal/buddies">Buddy System</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/portal/research-hub">Research Hub</Link>
             </Button>
           </div>
         </div>

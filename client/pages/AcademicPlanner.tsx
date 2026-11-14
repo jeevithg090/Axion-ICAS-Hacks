@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useFirebaseAuth } from "@/context/FirebaseAuthContext";
+import { useAuth } from "@/context/AuthContext";
 import SEO from "@/components/SEO";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,8 +21,8 @@ import {
   getRecommendedCourses,
   calculateGPA,
   calculateProjectedGPA,
-  gradeToGPA,
   validateTransferCredits,
+  totalCredits,
   type AcademicPlan,
   type Course,
   type CourseGrade,
@@ -32,9 +32,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
 export default function AcademicPlanner() {
-  const { user, loading } = useFirebaseAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
-  
+
   const [plan, setPlan] = useState<AcademicPlan | null>(null);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [recommendedCourses, setRecommendedCourses] = useState<Course[]>([]);
@@ -46,14 +46,14 @@ export default function AcademicPlanner() {
     if (!user?.uid) return;
 
     // Load academic plan
-    getAcademicPlan(user.uid).then(existingPlan => {
+    getAcademicPlan(user.uid).then((existingPlan) => {
       if (existingPlan) {
         setPlan(existingPlan);
         setSelectedSemester(existingPlan.currentSemester + 1);
         setSelectedYear(existingPlan.currentYear);
       } else {
         // Create initial plan
-        const newPlan: Omit<AcademicPlan, 'createdAt' | 'updatedAt'> = {
+        const newPlan: Omit<AcademicPlan, "createdAt" | "updatedAt"> = {
           userId: user.uid,
           currentSemester: 2,
           currentYear: 1,
@@ -73,7 +73,7 @@ export default function AcademicPlanner() {
             },
             {
               courseId: "math101",
-              courseCode: "MATH101", 
+              courseCode: "MATH101",
               courseName: "Calculus I",
               grade: "B+",
               gpa: 8,
@@ -98,8 +98,12 @@ export default function AcademicPlanner() {
   useEffect(() => {
     if (plan) {
       // Get recommended courses for next semester
-      getRecommendedCourses(user.uid!, plan, selectedSemester, selectedYear)
-        .then(setRecommendedCourses);
+      getRecommendedCourses(
+        user.uid!,
+        plan,
+        selectedSemester,
+        selectedYear,
+      ).then(setRecommendedCourses);
     }
   }, [plan, selectedSemester, selectedYear, user?.uid]);
 
@@ -117,32 +121,38 @@ export default function AcademicPlanner() {
           semester: selectedSemester,
           year: selectedYear,
           priority: "medium" as const,
-        }
-      ]
+        },
+      ],
     };
 
     await updateAcademicPlan(user.uid, updatedPlan);
     setPlan(updatedPlan);
-    
+
     toast({
       title: "Course added",
       description: "Course added to your academic plan",
     });
   };
 
-  const handleCreateScenario = (scenarioName: string, courses: { courseId: string; expectedGrade: string }[]) => {
+  const handleCreateScenario = (
+    scenarioName: string,
+    courses: { courseId: string; expectedGrade: string }[],
+  ) => {
     if (!plan) return;
 
-    const coursesWithCredits = courses.map(c => {
-      const course = allCourses.find(ac => ac.id === c.courseId);
+    const coursesWithCredits = courses.map((c) => {
+      const course = allCourses.find((ac) => ac.id === c.courseId);
       return {
         ...c,
         credits: course?.credits || 3,
       };
     });
 
-    const projectedGPA = calculateProjectedGPA(plan.completedCourses, coursesWithCredits);
-    
+    const projectedGPA = calculateProjectedGPA(
+      plan.completedCourses,
+      coursesWithCredits,
+    );
+
     const scenario: GPAScenario = {
       name: scenarioName,
       courses,
@@ -211,7 +221,10 @@ export default function AcademicPlanner() {
 
                 <TabsContent value="planner" className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <Select value={selectedSemester.toString()} onValueChange={(v) => setSelectedSemester(parseInt(v))}>
+                    <Select
+                      value={selectedSemester.toString()}
+                      onValueChange={(v) => setSelectedSemester(parseInt(v))}
+                    >
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -222,8 +235,11 @@ export default function AcademicPlanner() {
                         <SelectItem value="6">Semester 6</SelectItem>
                       </SelectContent>
                     </Select>
-                    
-                    <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(parseInt(v))}>
+
+                    <Select
+                      value={selectedYear.toString()}
+                      onValueChange={(v) => setSelectedYear(parseInt(v))}
+                    >
                       <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
@@ -233,14 +249,14 @@ export default function AcademicPlanner() {
                         <SelectItem value="4">Year 4</SelectItem>
                       </SelectContent>
                     </Select>
-                    
+
                     <Badge variant="secondary">
                       {recommendedCourses.length} recommended courses
                     </Badge>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
-                    {recommendedCourses.map(course => (
+                    {recommendedCourses.map((course) => (
                       <Card key={course.id}>
                         <CardHeader>
                           <CardTitle className="text-base flex items-start justify-between">
@@ -250,10 +266,15 @@ export default function AcademicPlanner() {
                                 {course.code} • {course.credits} credits
                               </div>
                             </div>
-                            <Badge variant={
-                              course.category === "core" ? "default" :
-                              course.category === "elective" ? "secondary" : "outline"
-                            }>
+                            <Badge
+                              variant={
+                                course.category === "core"
+                                  ? "default"
+                                  : course.category === "elective"
+                                    ? "secondary"
+                                    : "outline"
+                              }
+                            >
                               {course.category}
                             </Badge>
                           </CardTitle>
@@ -262,7 +283,7 @@ export default function AcademicPlanner() {
                           <p className="text-sm text-muted-foreground">
                             {course.description}
                           </p>
-                          
+
                           <div className="flex items-center gap-4 text-xs">
                             <Badge variant="outline">{course.difficulty}</Badge>
                             {course.instructor && (
@@ -271,24 +292,29 @@ export default function AcademicPlanner() {
                               </span>
                             )}
                           </div>
-                          
+
                           {course.prerequisites.length > 0 && (
                             <div className="text-xs">
-                              <span className="text-muted-foreground">Prerequisites: </span>
+                              <span className="text-muted-foreground">
+                                Prerequisites:{" "}
+                              </span>
                               {course.prerequisites.join(", ")}
                             </div>
                           )}
-                          
-                          <Button 
-                            size="sm" 
+
+                          <Button
+                            size="sm"
                             className="w-full"
                             onClick={() => handleAddCourse(course.id)}
-                            disabled={plan.plannedCourses.some(pc => pc.courseId === course.id)}
+                            disabled={plan.plannedCourses.some(
+                              (pc) => pc.courseId === course.id,
+                            )}
                           >
-                            {plan.plannedCourses.some(pc => pc.courseId === course.id) 
-                              ? "Added to Plan" 
-                              : "Add to Plan"
-                            }
+                            {plan.plannedCourses.some(
+                              (pc) => pc.courseId === course.id,
+                            )
+                              ? "Added to Plan"
+                              : "Add to Plan"}
                           </Button>
                         </CardContent>
                       </Card>
@@ -297,7 +323,7 @@ export default function AcademicPlanner() {
                 </TabsContent>
 
                 <TabsContent value="gpa" className="space-y-4">
-                  <GPACalculatorSection 
+                  <GPACalculatorSection
                     plan={plan}
                     allCourses={allCourses}
                     scenarios={gpaScenarios}
@@ -306,7 +332,7 @@ export default function AcademicPlanner() {
                 </TabsContent>
 
                 <TabsContent value="transfer" className="space-y-4">
-                  <TransferCreditsSection 
+                  <TransferCreditsSection
                     completedCourses={plan.completedCourses}
                     targetUniversityId={plan.targetUniversityId}
                   />
@@ -323,20 +349,34 @@ export default function AcademicPlanner() {
                 <CardContent className="space-y-3">
                   <div className="grid gap-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Current GPA:</span>
-                      <span className="font-semibold">{currentGPA.toFixed(2)}</span>
+                      <span className="text-muted-foreground">
+                        Current GPA:
+                      </span>
+                      <span className="font-semibold">
+                        {currentGPA.toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Target GPA:</span>
-                      <span className="font-semibold">{plan.targetGPA.toFixed(2)}</span>
+                      <span className="font-semibold">
+                        {plan.targetGPA.toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Credits Earned:</span>
-                      <span className="font-semibold">{plan.creditsEarned}</span>
+                      <span className="text-muted-foreground">
+                        Credits Earned:
+                      </span>
+                      <span className="font-semibold">
+                        {totalCredits(plan.completedCourses)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Planned Courses:</span>
-                      <span className="font-semibold">{plan.plannedCourses.length}</span>
+                      <span className="text-muted-foreground">
+                        Planned Courses:
+                      </span>
+                      <span className="font-semibold">
+                        {plan.plannedCourses.length}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
@@ -347,8 +387,11 @@ export default function AcademicPlanner() {
                   <CardTitle className="text-lg">Completed Courses</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {plan.completedCourses.map(course => (
-                    <div key={course.courseId} className="flex items-center justify-between text-sm">
+                  {plan.completedCourses.map((course) => (
+                    <div
+                      key={course.courseId}
+                      className="flex items-center justify-between text-sm"
+                    >
                       <div>
                         <div className="font-medium">{course.courseCode}</div>
                         <div className="text-xs text-muted-foreground">
@@ -368,19 +411,24 @@ export default function AcademicPlanner() {
   );
 }
 
-function GPACalculatorSection({ 
-  plan, 
-  allCourses, 
-  scenarios, 
-  onCreateScenario 
+function GPACalculatorSection({
+  plan,
+  allCourses,
+  scenarios,
+  onCreateScenario,
 }: {
   plan: AcademicPlan;
   allCourses: Course[];
   scenarios: GPAScenario[];
-  onCreateScenario: (name: string, courses: { courseId: string; expectedGrade: string }[]) => void;
+  onCreateScenario: (
+    name: string,
+    courses: { courseId: string; expectedGrade: string }[],
+  ) => void;
 }) {
   const [scenarioName, setScenarioName] = useState("");
-  const [selectedCourses, setSelectedCourses] = useState<{ courseId: string; expectedGrade: string }[]>([]);
+  const [selectedCourses, setSelectedCourses] = useState<
+    { courseId: string; expectedGrade: string }[]
+  >([]);
 
   const addCourseToScenario = (courseId: string) => {
     setSelectedCourses([...selectedCourses, { courseId, expectedGrade: "A" }]);
@@ -420,8 +468,11 @@ function GPACalculatorSection({
               </SelectTrigger>
               <SelectContent>
                 {allCourses
-                  .filter(course => !selectedCourses.some(sc => sc.courseId === course.id))
-                  .map(course => (
+                  .filter(
+                    (course) =>
+                      !selectedCourses.some((sc) => sc.courseId === course.id),
+                  )
+                  .map((course) => (
                     <SelectItem key={course.id} value={course.id}>
                       {course.code} - {course.name} ({course.credits} credits)
                     </SelectItem>
@@ -434,13 +485,19 @@ function GPACalculatorSection({
             <div className="space-y-2">
               <div className="text-sm font-medium">Selected Courses</div>
               {selectedCourses.map((sc, index) => {
-                const course = allCourses.find(c => c.id === sc.courseId);
+                const course = allCourses.find((c) => c.id === sc.courseId);
                 return (
-                  <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 p-2 border rounded"
+                  >
                     <div className="flex-1 text-sm">
                       {course?.code} - {course?.name}
                     </div>
-                    <Select value={sc.expectedGrade} onValueChange={(grade) => updateCourseGrade(index, grade)}>
+                    <Select
+                      value={sc.expectedGrade}
+                      onValueChange={(grade) => updateCourseGrade(index, grade)}
+                    >
                       <SelectTrigger className="w-20">
                         <SelectValue />
                       </SelectTrigger>
@@ -455,8 +512,8 @@ function GPACalculatorSection({
                         <SelectItem value="C">C</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       variant="outline"
                       onClick={() => removeCourseFromScenario(index)}
                     >
@@ -468,7 +525,7 @@ function GPACalculatorSection({
             </div>
           )}
 
-          <Button 
+          <Button
             onClick={() => {
               if (scenarioName && selectedCourses.length > 0) {
                 onCreateScenario(scenarioName, selectedCourses);
@@ -493,13 +550,21 @@ function GPACalculatorSection({
               <div key={index} className="p-3 border rounded">
                 <div className="flex items-center justify-between">
                   <div className="font-medium">{scenario.name}</div>
-                  <Badge variant={scenario.projectedGPA >= plan.targetGPA ? "default" : "secondary"}>
+                  <Badge
+                    variant={
+                      scenario.projectedGPA >= plan.targetGPA
+                        ? "default"
+                        : "secondary"
+                    }
+                  >
                     GPA: {scenario.projectedGPA.toFixed(2)}
                   </Badge>
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {scenario.courses.length} courses • 
-                  {scenario.projectedGPA >= plan.targetGPA ? " Meets target" : " Below target"}
+                  {scenario.courses.length} courses •
+                  {scenario.projectedGPA >= plan.targetGPA
+                    ? " Meets target"
+                    : " Below target"}
                 </div>
               </div>
             ))}
@@ -510,19 +575,23 @@ function GPACalculatorSection({
   );
 }
 
-function TransferCreditsSection({ 
-  completedCourses, 
-  targetUniversityId 
+function TransferCreditsSection({
+  completedCourses,
+  targetUniversityId,
 }: {
   completedCourses: CourseGrade[];
   targetUniversityId?: string;
 }) {
-  const [validation, setValidation] = useState<{ valid: any[]; invalid: CourseGrade[] } | null>(null);
+  const [validation, setValidation] = useState<{
+    valid: any[];
+    invalid: CourseGrade[];
+  } | null>(null);
 
   useEffect(() => {
     if (targetUniversityId) {
-      validateTransferCredits(completedCourses, targetUniversityId)
-        .then(setValidation);
+      validateTransferCredits(completedCourses, targetUniversityId).then(
+        setValidation,
+      );
     }
   }, [completedCourses, targetUniversityId]);
 
@@ -535,7 +604,8 @@ function TransferCreditsSection({
         <CardContent className="space-y-4">
           {!targetUniversityId ? (
             <p className="text-muted-foreground">
-              Select a target university in the Transfer Portal to validate credits.
+              Select a target university in the Transfer Portal to validate
+              credits.
             </p>
           ) : validation ? (
             <div className="space-y-4">
@@ -545,9 +615,14 @@ function TransferCreditsSection({
                 </h4>
                 <div className="space-y-2">
                   {validation.valid.map((credit, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded bg-green-50 dark:bg-green-950">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 border rounded bg-green-50 dark:bg-green-950"
+                    >
                       <div className="text-sm">
-                        <div className="font-medium">{credit.originalCourse}</div>
+                        <div className="font-medium">
+                          {credit.originalCourse}
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           {credit.credits} credits
                         </div>
@@ -567,7 +642,10 @@ function TransferCreditsSection({
                   </h4>
                   <div className="space-y-2">
                     {validation.invalid.map((course, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 border rounded bg-orange-50 dark:bg-orange-950">
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 border rounded bg-orange-50 dark:bg-orange-950"
+                      >
                         <div className="text-sm">
                           <div className="font-medium">{course.courseCode}</div>
                           <div className="text-xs text-muted-foreground">
@@ -586,7 +664,9 @@ function TransferCreditsSection({
           ) : (
             <div className="text-center py-4">
               <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-              <p className="text-sm text-muted-foreground mt-2">Validating credits...</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Validating credits...
+              </p>
             </div>
           )}
         </CardContent>

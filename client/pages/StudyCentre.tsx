@@ -1,3 +1,4 @@
+import DOMPurify from "dompurify";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import SEO from "@/components/SEO";
@@ -15,7 +16,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,16 +35,22 @@ import {
 } from "@/lib/study-centre";
 import { Link } from "react-router-dom";
 
-function useStudyCourses(userEmail: string | undefined) {
+function useStudyCourses(userId: string | undefined) {
   const [courses, setCourses] = useState<Course[]>([]);
   useEffect(() => {
-    if (!userEmail) return;
-    const userId = userIdFromEmail(userEmail);
-    ensureInit(userId).then(() => {
-      const unsubList = subscribeCourses(userId, setCourses);
-      return () => unsubList();
-    });
-  }, [userEmail]);
+    if (!userId) return;
+    let cancelled = false;
+    let unsubscribe: (() => void) | undefined;
+    ensureInit(userId)
+      .then(() => {
+        if (!cancelled) unsubscribe = subscribeCourses(userId, setCourses);
+      })
+      .catch((err) => console.error("Failed to load study centre", err));
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [userId]);
   return courses;
 }
 
@@ -98,6 +104,10 @@ function FilePreview({ item }: { item: Upload }) {
   );
 }
 
+function sanitizeNotes(html: string): string {
+  return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+}
+
 function NotesEditor({
   initial,
   onSave,
@@ -107,7 +117,8 @@ function NotesEditor({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (ref.current) ref.current.innerHTML = initial || "";
+    // Notes are stored as HTML; sanitize before rendering to prevent XSS.
+    if (ref.current) ref.current.innerHTML = sanitizeNotes(initial || "");
   }, [initial]);
   function applyHighlight() {
     document.execCommand("backColor", false, "#fff59d");
@@ -122,7 +133,7 @@ function NotesEditor({
           type="button"
           size="sm"
           variant="secondary"
-          onClick={() => onSave(ref.current?.innerHTML || "")}
+          onClick={() => onSave(sanitizeNotes(ref.current?.innerHTML || ""))}
         >
           Save Notes
         </Button>
@@ -354,12 +365,12 @@ function CourseCard({ course, userId }: { course: Course; userId: string }) {
 
 export default function StudyCentre() {
   const { user } = useAuth();
-  const email = user?.email;
+  // Prefer the Firebase UID so Firestore security rules can scope data per user.
   const userId = useMemo(
-    () => (email ? userIdFromEmail(email) : undefined),
-    [email],
+    () => user?.uid ?? (user?.email ? userIdFromEmail(user.email) : undefined),
+    [user?.uid, user?.email],
   );
-  const courses = useStudyCourses(email);
+  const courses = useStudyCourses(userId);
 
   return (
     <main>

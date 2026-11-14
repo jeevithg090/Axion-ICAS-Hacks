@@ -12,17 +12,41 @@ const ROUTES: { to: string; labels: string[] }[] = [
   { to: "/", labels: ["home", "homepage", "start"] },
   { to: "/about", labels: ["about", "timeline", "history", "research stats"] },
   { to: "/academics", labels: ["academics", "courses", "programs", "degree"] },
-  { to: "/research", labels: ["research", "medicine", "labs", "case studies", "metrics"] },
+  {
+    to: "/research",
+    labels: ["research", "medicine", "labs", "case studies", "metrics"],
+  },
   { to: "/student-life", labels: ["student", "life", "community", "feed"] },
-  { to: "/admissions-aid", labels: ["admissions", "aid", "scholarships", "apply"] },
+  {
+    to: "/admissions-aid",
+    labels: ["admissions", "aid", "scholarships", "apply"],
+  },
   { to: "/transfer", labels: ["transfer", "2+2", "pathway", "abroad"] },
   { to: "/news", labels: ["news", "featured", "records", "clips"] },
   { to: "/events", labels: ["events", "calendar", "upcoming", "current"] },
   { to: "/faculty", labels: ["faculty", "directory", "staff", "professors"] },
-  { to: "/financial-aid", labels: ["financial", "aid", "scholarships", "tuition"] },
+  {
+    to: "/financial-aid",
+    labels: ["financial", "aid", "scholarships", "tuition"],
+  },
   { to: "/medical-aid", labels: ["medical", "health", "insurance", "care"] },
   { to: "/impact", labels: ["impact", "outreach", "community", "global"] },
   { to: "/contact", labels: ["contact", "email", "address", "phone"] },
+  { to: "/portal", labels: ["portal", "dashboard", "assignments", "grades"] },
+  {
+    to: "/portal/transfer",
+    labels: ["documents", "visa", "deadlines", "eligibility"],
+  },
+  {
+    to: "/portal/study-centre",
+    labels: ["study", "notes", "syllabus", "uploads"],
+  },
+  { to: "/portal/planner", labels: ["planner", "gpa", "credits", "schedule"] },
+  { to: "/portal/buddies", labels: ["buddy", "mentor", "mentee", "peer"] },
+  {
+    to: "/portal/research-hub",
+    labels: ["projects", "research hub", "team", "collaborate"],
+  },
 ];
 
 function matchRoutes(q: string) {
@@ -30,23 +54,34 @@ function matchRoutes(q: string) {
   const matches = ROUTES.filter((r) =>
     r.labels.some((l) => query.includes(l)),
   ).slice(0, 5);
-  return matches.map((m) => ({ label: m.to.split("/").slice(-1)[0] || "home", to: m.to }));
+  return matches.map((m) => ({
+    label: m.to.split("/").slice(-1)[0] || "home",
+    to: m.to,
+  }));
 }
 
 export default function AiNavBot() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([{
-    role: "assistant",
-    content:
-      "Hi! I’m the ICAS navigator. Ask me to find pages, events, or resources—try ‘show upcoming events’ or ‘financial aid’.",
-    choices: ROUTES.slice(1, 4).map((r) => ({ label: r.to.replace("/", "") || "home", to: r.to })),
-  }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: "assistant",
+      content:
+        "Hi! I’m the ICAS navigator. Ask me to find pages, events, or resources—try ‘show upcoming events’ or ‘financial aid’.",
+      choices: ROUTES.slice(1, 4).map((r) => ({
+        label: r.to.replace("/", "") || "home",
+        to: r.to,
+      })),
+    },
+  ]);
   const navigate = useNavigate();
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+    listRef.current?.scrollTo({
+      top: listRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [messages]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -97,8 +132,13 @@ export default function AiNavBot() {
           </div>
           <div ref={listRef} className="max-h-72 space-y-3 overflow-auto p-3">
             {messages.map((m, i) => (
-              <div key={i} className={m.role === "assistant" ? "" : "text-right"}>
-                <div className={`inline-block rounded-lg px-3 py-2 text-sm ${m.role === "assistant" ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"}`}>
+              <div
+                key={i}
+                className={m.role === "assistant" ? "" : "text-right"}
+              >
+                <div
+                  className={`inline-block rounded-lg px-3 py-2 text-sm ${m.role === "assistant" ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"}`}
+                >
                   {m.content}
                 </div>
                 {m.choices && (
