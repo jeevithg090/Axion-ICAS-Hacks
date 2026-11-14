@@ -1,40 +1,31 @@
-import path from "path";
+import path from "node:path";
+import express from "express";
 import { createServer } from "./index";
-import * as express from "express";
 
 const app = createServer();
-const port = process.env.PORT || 3000;
+const port = Number(process.env.PORT) || 3000;
 
-// In production, serve the built SPA files
-const __dirname = import.meta.dirname;
-const distPath = path.join(__dirname, "../spa");
+// In production the built SPA lives next to the server bundle.
+const distPath = path.join(import.meta.dirname, "../spa");
 
-// Serve static files
-app.use(express.static(distPath));
+app.use(express.static(distPath, { index: false, maxAge: "1h" }));
 
-// Handle React Router - serve index.html for all non-API routes
-app.get("*", (req, res) => {
-  // Don't serve index.html for API routes
-  if (req.path.startsWith("/api/") || req.path.startsWith("/health")) {
-    return res.status(404).json({ error: "API endpoint not found" });
-  }
-
+// Client-side routing: every non-API GET falls back to index.html.
+app.get("/{*splat}", (_req, res) => {
   res.sendFile(path.join(distPath, "index.html"));
 });
 
-app.listen(port, () => {
-  console.log(`🚀 Fusion Starter server running on port ${port}`);
-  console.log(`📱 Frontend: http://localhost:${port}`);
-  console.log(`🔧 API: http://localhost:${port}/api`);
+const server = app.listen(port, () => {
+  console.log(
+    `ICAS Student Life Assistant listening on http://localhost:${port}`,
+  );
 });
 
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("🛑 Received SIGTERM, shutting down gracefully");
-  process.exit(0);
-});
+function shutdown(signal: string) {
+  console.log(`Received ${signal}, shutting down`);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
 
-process.on("SIGINT", () => {
-  console.log("🛑 Received SIGINT, shutting down gracefully");
-  process.exit(0);
-});
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));

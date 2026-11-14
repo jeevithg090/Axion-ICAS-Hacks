@@ -1,14 +1,26 @@
 /**
- * Shared code between client and server
- * Useful to share types between client and server
- * and/or small pure JS functions that can be used on both client and server
+ * Types shared between the React client and the Express API.
  */
 
-/**
- * Example response type for /api/demo
- */
-export interface DemoResponse {
+/** Error payload returned by every API endpoint on failure. */
+export interface ApiError {
+  error: string;
+}
+
+/** GET /api/ping */
+export interface PingResponse {
   message: string;
+}
+
+/** POST /api/transfer/assistant request body */
+export interface TransferAssistantRequest {
+  question: string;
+  context?: unknown;
+}
+
+/** POST /api/transfer/assistant */
+export interface TransferAssistantResponse {
+  answer: string;
 }
 
 export interface MeetingActionItem {
@@ -34,8 +46,10 @@ export interface MeetingSummary {
   timeline?: MeetingTimelineEntry[];
 }
 
+/** POST /api/delegate/summary */
 export interface DelegateSummaryResponse {
   transcript: string;
-  summary: MeetingSummary | string; // string when JSON parsing fails
+  /** Structured summary, or the raw model output when it was not valid JSON. */
+  summary: MeetingSummary | string;
   modelUsed?: string;
 }
