@@ -1,6 +1,15 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Menu } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { homeFor } from "@/lib/auth-users";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 const nav = [
   { to: "/about", label: "About" },
@@ -18,6 +27,10 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const isHome = pathname === "/";
   const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the mobile menu after navigating.
+  useEffect(() => setMenuOpen(false), [pathname]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -56,17 +69,6 @@ export default function Header() {
               +91 80 1234 5678
             </a>
           </div>
-          <div className="flex items-center gap-3">
-            <a href="#" aria-label="Facebook" className="hover:opacity-80">
-              Fb
-            </a>
-            <a href="#" aria-label="LinkedIn" className="hover:opacity-80">
-              In
-            </a>
-            <a href="#" aria-label="YouTube" className="hover:opacity-80">
-              Yt
-            </a>
-          </div>
         </div>
       </div>
 
@@ -85,7 +87,10 @@ export default function Header() {
           />
           ICAS
         </Link>
-        <nav className="hidden items-center gap-5 text-sm font-medium md:flex">
+        <nav
+          aria-label="Main"
+          className="hidden items-center gap-5 text-sm font-medium md:flex"
+        >
           {nav.map((n) => (
             <NavLink
               key={n.to}
@@ -103,6 +108,38 @@ export default function Header() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+            <SheetTrigger asChild>
+              <button
+                type="button"
+                aria-label="Open menu"
+                className={`rounded-md p-2 md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${transparent ? "text-white" : ""}`}
+              >
+                <Menu className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72">
+              <SheetHeader>
+                <SheetTitle>ICAS</SheetTitle>
+              </SheetHeader>
+              <nav
+                aria-label="Mobile"
+                className="mt-6 grid gap-1 text-sm font-medium"
+              >
+                {nav.map((n) => (
+                  <NavLink
+                    key={n.to}
+                    to={n.to}
+                    className={({ isActive }) =>
+                      `rounded-md px-3 py-2 transition-colors hover:bg-muted ${isActive ? "text-primary" : "text-foreground"}`
+                    }
+                  >
+                    {n.label}
+                  </NavLink>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
           {!user ? (
             <Link
               to="/login"
@@ -117,7 +154,7 @@ export default function Header() {
           ) : (
             <>
               <Link
-                to={user.role === "admin" ? "/admin" : "/portal"}
+                to={homeFor(user.role)}
                 className={
                   transparent
                     ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
@@ -127,7 +164,8 @@ export default function Header() {
                 {user.role === "admin" ? "Admin" : "Portal"}
               </Link>
               <button
-                onClick={() => logout()}
+                type="button"
+                onClick={() => void logout()}
                 className={
                   transparent
                     ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/90 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
