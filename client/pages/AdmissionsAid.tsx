@@ -10,13 +10,13 @@ export default function AdmissionsAid() {
         description="How to apply, scholarships, and medical support."
       />
       <section className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">Admissions & Aid</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
+        <h1 className="page-title">Admissions & Aid</h1>
+        <p className="page-lead">
           Get started with applications and explore scholarships and campus
           medical support.
         </p>
         <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <article className="rounded-xl bg-card p-6 ring-1 ring-border">
+          <article className="rounded-xl bg-card p-6 border shadow-sm">
             <h2 className="text-lg font-semibold">Scholarships & Grants</h2>
             <ul className="mt-3 space-y-3 text-sm">
               {scholarships.map((s) => (
@@ -36,7 +36,7 @@ export default function AdmissionsAid() {
               More on Financial Aid
             </Link>
           </article>
-          <article className="rounded-xl bg-card p-6 ring-1 ring-border">
+          <article className="rounded-xl bg-card p-6 border shadow-sm">
             <h2 className="text-lg font-semibold">Medical Aid</h2>
             <ul className="mt-3 space-y-3 text-sm">
               {medicalAid.map((m) => (

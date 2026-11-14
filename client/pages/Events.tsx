@@ -10,9 +10,13 @@ export default function Events() {
     <main>
       <SEO title="Events — ICAS" description="Current and upcoming events." />
       <section className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">Events</h1>
+        <h1 className="page-title">Events</h1>
+        <p className="page-lead">
+          Talks, colloquia and student events: what is on now, coming up and
+          already done.
+        </p>
 
-        <div className="mt-6 grid gap-8 md:grid-cols-2">
+        <div className="mt-10 grid gap-8 md:grid-cols-2">
           {Object.entries(groups).map(([key, list]) => (
             <div key={key}>
               <h2 className="text-xl font-semibold capitalize">{key}</h2>
@@ -20,7 +24,7 @@ export default function Events() {
                 {list.map((e) => (
                   <li
                     key={e.title}
-                    className="rounded-lg bg-card p-4 ring-1 ring-border"
+                    className="rounded-lg bg-card p-4 border shadow-sm"
                   >
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-semibold text-primary">

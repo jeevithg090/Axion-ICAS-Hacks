@@ -190,10 +190,8 @@ export default function ResearchHub() {
       <section className="container py-10">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Research & Peer Learning Hub
-            </h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="page-title">Research & Peer Learning Hub</h1>
+            <p className="page-lead">
               Collaborate on projects and learn together
             </p>
           </div>

@@ -9,10 +9,8 @@ export default function Research() {
         description="Labs, metrics, and translational case studies at ICAS."
       />
       <section className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Research & Medicine
-        </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
+        <h1 className="page-title">Research & Medicine</h1>
+        <p className="page-lead">
           From lab to clinic: measurable outcomes and open collaboration.
         </p>
 
@@ -20,7 +18,7 @@ export default function Research() {
           {caseStudies.map((cs) => (
             <article
               key={cs.title}
-              className="rounded-xl bg-card p-6 ring-1 ring-border shadow-sm"
+              className="rounded-xl bg-card p-6 border shadow-sm shadow-sm"
             >
               <div className="text-xs uppercase text-muted-foreground">
                 {cs.area}
@@ -47,7 +45,7 @@ export default function Research() {
             {labs.map((l) => (
               <li
                 key={l.name}
-                className="rounded-lg bg-card p-4 ring-1 ring-border"
+                className="rounded-lg bg-card p-4 border shadow-sm"
               >
                 <div className="font-medium">{l.name}</div>
                 <div className="text-xs text-muted-foreground">{l.pi}</div>

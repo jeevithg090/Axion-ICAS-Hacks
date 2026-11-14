@@ -158,10 +158,8 @@ export default function BuddySystem() {
       <section className="container py-10">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              ICAS Buddy System
-            </h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="page-title">ICAS Buddy System</h1>
+            <p className="page-lead">
               Connect with mentors who've been through your journey
             </p>
           </div>
@@ -188,7 +186,7 @@ export default function BuddySystem() {
             </CardContent>
           </Card>
         ) : (
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <Tabs defaultValue="matches" className="w-full">
                 <TabsList>
