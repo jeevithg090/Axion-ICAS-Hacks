@@ -1,15 +1,14 @@
-import { 
-  collection, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  query, 
-  where, 
-  orderBy, 
+import {
+  collection,
+  doc,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
   onSnapshot,
   getDocs,
   arrayUnion,
-  arrayRemove
 } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -57,7 +56,9 @@ export interface ProjectUpdate {
 }
 
 // Project Operations
-export async function createResearchProject(project: Omit<ResearchProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<void> {
+export async function createResearchProject(
+  project: Omit<ResearchProject, "id" | "createdAt" | "updatedAt">,
+): Promise<void> {
   await addDoc(collection(db, "researchProjects"), {
     ...project,
     createdAt: new Date().toISOString(),
@@ -65,7 +66,10 @@ export async function createResearchProject(project: Omit<ResearchProject, 'id' 
   });
 }
 
-export async function updateResearchProject(projectId: string, updates: Partial<ResearchProject>): Promise<void> {
+export async function updateResearchProject(
+  projectId: string,
+  updates: Partial<ResearchProject>,
+): Promise<void> {
   const docRef = doc(db, "researchProjects", projectId);
   await updateDoc(docRef, {
     ...updates,
@@ -73,12 +77,14 @@ export async function updateResearchProject(projectId: string, updates: Partial<
   });
 }
 
-export function subscribeToResearchProjects(callback: (projects: ResearchProject[]) => void) {
+export function subscribeToResearchProjects(
+  callback: (projects: ResearchProject[]) => void,
+) {
   const q = query(
     collection(db, "researchProjects"),
-    orderBy("createdAt", "desc")
+    orderBy("createdAt", "desc"),
   );
-  
+
   return onSnapshot(q, (snapshot) => {
     const projects: ResearchProject[] = [];
     snapshot.forEach((doc) => {
@@ -88,13 +94,16 @@ export function subscribeToResearchProjects(callback: (projects: ResearchProject
   });
 }
 
-export function subscribeToUserProjects(userId: string, callback: (projects: ResearchProject[]) => void) {
+export function subscribeToUserProjects(
+  userId: string,
+  callback: (projects: ResearchProject[]) => void,
+) {
   const q = query(
     collection(db, "researchProjects"),
     where("currentMembers", "array-contains", userId),
-    orderBy("updatedAt", "desc")
+    orderBy("updatedAt", "desc"),
   );
-  
+
   return onSnapshot(q, (snapshot) => {
     const projects: ResearchProject[] = [];
     snapshot.forEach((doc) => {
@@ -111,7 +120,7 @@ export async function applyToProject(
   applicantName: string,
   applicantEmail: string,
   message: string,
-  skills: string[]
+  skills: string[],
 ): Promise<void> {
   await addDoc(collection(db, "projectApplications"), {
     projectId,
@@ -126,19 +135,21 @@ export async function applyToProject(
 }
 
 export async function updateApplicationStatus(
-  applicationId: string, 
-  status: ProjectApplication['status']
+  applicationId: string,
+  status: ProjectApplication["status"],
 ): Promise<void> {
   const docRef = doc(db, "projectApplications", applicationId);
   await updateDoc(docRef, { status });
-  
+
   // If accepted, add user to project members
   if (status === "accepted") {
-    const appDoc = await getDocs(query(
-      collection(db, "projectApplications"),
-      where("__name__", "==", applicationId)
-    ));
-    
+    const appDoc = await getDocs(
+      query(
+        collection(db, "projectApplications"),
+        where("__name__", "==", applicationId),
+      ),
+    );
+
     if (!appDoc.empty) {
       const app = appDoc.docs[0].data() as ProjectApplication;
       const projectRef = doc(db, "researchProjects", app.projectId);
@@ -151,15 +162,15 @@ export async function updateApplicationStatus(
 }
 
 export function subscribeToProjectApplications(
-  projectId: string, 
-  callback: (applications: ProjectApplication[]) => void
+  projectId: string,
+  callback: (applications: ProjectApplication[]) => void,
 ) {
   const q = query(
     collection(db, "projectApplications"),
     where("projectId", "==", projectId),
-    orderBy("appliedAt", "desc")
+    orderBy("appliedAt", "desc"),
   );
-  
+
   return onSnapshot(q, (snapshot) => {
     const applications: ProjectApplication[] = [];
     snapshot.forEach((doc) => {
@@ -170,7 +181,9 @@ export function subscribeToProjectApplications(
 }
 
 // Project Updates Operations
-export async function addProjectUpdate(update: Omit<ProjectUpdate, 'id'>): Promise<void> {
+export async function addProjectUpdate(
+  update: Omit<ProjectUpdate, "id" | "timestamp">,
+): Promise<void> {
   await addDoc(collection(db, "projectUpdates"), {
     ...update,
     timestamp: new Date().toISOString(),
@@ -178,15 +191,15 @@ export async function addProjectUpdate(update: Omit<ProjectUpdate, 'id'>): Promi
 }
 
 export function subscribeToProjectUpdates(
-  projectId: string, 
-  callback: (updates: ProjectUpdate[]) => void
+  projectId: string,
+  callback: (updates: ProjectUpdate[]) => void,
 ) {
   const q = query(
     collection(db, "projectUpdates"),
     where("projectId", "==", projectId),
-    orderBy("timestamp", "desc")
+    orderBy("timestamp", "desc"),
   );
-  
+
   return onSnapshot(q, (snapshot) => {
     const updates: ProjectUpdate[] = [];
     snapshot.forEach((doc) => {
@@ -200,51 +213,53 @@ export function subscribeToProjectUpdates(
 export async function getProjectRecommendations(
   userId: string,
   userSkills: string[],
-  userInterests: string[]
+  userInterests: string[],
 ): Promise<ResearchProject[]> {
   const q = query(
     collection(db, "researchProjects"),
-    where("status", "==", "open")
+    where("status", "==", "open"),
   );
-  
+
   const snapshot = await getDocs(q);
   const projects: ResearchProject[] = [];
-  
+
   snapshot.forEach((doc) => {
     const project = { id: doc.id, ...doc.data() } as ResearchProject;
-    
+
     // Skip if user is already a member
     if (project.currentMembers.includes(userId)) return;
-    
+
     // Calculate relevance score
     let score = 0;
-    
+
     // Skill matching
-    const skillMatches = project.skillsRequired.filter(skill => 
-      userSkills.some(userSkill => 
-        userSkill.toLowerCase().includes(skill.toLowerCase()) ||
-        skill.toLowerCase().includes(userSkill.toLowerCase())
-      )
+    const skillMatches = project.skillsRequired.filter((skill) =>
+      userSkills.some(
+        (userSkill) =>
+          userSkill.toLowerCase().includes(skill.toLowerCase()) ||
+          skill.toLowerCase().includes(userSkill.toLowerCase()),
+      ),
     );
     score += skillMatches.length * 20;
-    
+
     // Interest/tag matching
-    const interestMatches = project.tags.filter(tag =>
-      userInterests.some(interest =>
-        interest.toLowerCase().includes(tag.toLowerCase()) ||
-        tag.toLowerCase().includes(interest.toLowerCase())
-      )
+    const interestMatches = project.tags.filter((tag) =>
+      userInterests.some(
+        (interest) =>
+          interest.toLowerCase().includes(tag.toLowerCase()) ||
+          tag.toLowerCase().includes(interest.toLowerCase()),
+      ),
     );
     score += interestMatches.length * 15;
-    
+
     // Category preference (could be based on user's past projects)
     if (userInterests.includes(project.category)) score += 10;
-    
+
     projects.push({ ...project, relevanceScore: score } as any);
   });
-  
+
   return projects
-    .filter(p => (p as any).relevanceScore > 0)
+    .filter((p) => (p as any).relevanceScore > 0)
     .sort((a, b) => (b as any).relevanceScore - (a as any).relevanceScore)
     .slice(0, 10);
 }

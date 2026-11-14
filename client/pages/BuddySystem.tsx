@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useFirebaseAuth } from "@/context/FirebaseAuthContext";
+import { useAuth } from "@/context/AuthContext";
 import SEO from "@/components/SEO";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   getBuddyProfile,
@@ -32,9 +31,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 
 export default function BuddySystem() {
-  const { user, loading } = useFirebaseAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
-  
+
   const [profile, setProfile] = useState<BuddyProfile | null>(null);
   const [matches, setMatches] = useState<BuddyMatch[]>([]);
   const [potentialMatches, setPotentialMatches] = useState<BuddyProfile[]>([]);
@@ -58,7 +57,10 @@ export default function BuddySystem() {
 
   useEffect(() => {
     if (selectedMatch) {
-      const unsubMessages = subscribeToMatchMessages(selectedMatch, setMessages);
+      const unsubMessages = subscribeToMatchMessages(
+        selectedMatch,
+        setMessages,
+      );
       return () => unsubMessages();
     }
   }, [selectedMatch]);
@@ -66,26 +68,28 @@ export default function BuddySystem() {
   const handleCreateProfile = async (formData: FormData) => {
     if (!user?.uid) return;
 
-    const interests = (formData.get('interests') as string).split(',').map(s => s.trim());
-    
+    const interests = (formData.get("interests") as string)
+      .split(",")
+      .map((s) => s.trim());
+
     await createBuddyProfile({
       userId: user.uid,
       name: user.name,
       email: user.email,
-      role: formData.get('role') as "mentor" | "mentee",
-      program: formData.get('program') as string,
-      year: parseInt(formData.get('year') as string),
-      targetCountry: formData.get('targetCountry') as string,
-      targetUniversity: formData.get('targetUniversity') as string,
+      role: formData.get("role") as "mentor" | "mentee",
+      program: formData.get("program") as string,
+      year: parseInt(formData.get("year") as string),
+      targetCountry: formData.get("targetCountry") as string,
+      targetUniversity: formData.get("targetUniversity") as string,
       interests,
-      bio: formData.get('bio') as string,
+      bio: formData.get("bio") as string,
       isAvailable: true,
     });
 
     const newProfile = await getBuddyProfile(user.uid);
     setProfile(newProfile);
     setShowCreateProfile(false);
-    
+
     toast({
       title: "Profile created",
       description: "Your buddy profile has been created successfully!",
@@ -94,10 +98,10 @@ export default function BuddySystem() {
 
   const handleFindMatches = async () => {
     if (!profile) return;
-    
+
     const matches = await findPotentialMatches(profile);
     setPotentialMatches(matches);
-    
+
     toast({
       title: "Matches found",
       description: `Found ${matches.length} potential matches for you!`,
@@ -106,9 +110,9 @@ export default function BuddySystem() {
 
   const handleSendMatch = async (mentorId: string, score: number) => {
     if (!user?.uid) return;
-    
+
     await createBuddyMatch(mentorId, user.uid, score);
-    
+
     toast({
       title: "Match request sent",
       description: "Your buddy request has been sent!",
@@ -117,7 +121,7 @@ export default function BuddySystem() {
 
   const handleSendMessage = async (content: string) => {
     if (!selectedMatch || !user?.uid) return;
-    
+
     await sendBuddyMessage(selectedMatch, user.uid, content);
   };
 
@@ -175,7 +179,8 @@ export default function BuddySystem() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground mb-4">
-                Create a profile to get matched with mentors or become a mentor yourself.
+                Create a profile to get matched with mentors or become a mentor
+                yourself.
               </p>
               <Button onClick={() => setShowCreateProfile(true)}>
                 Create Profile
@@ -197,11 +202,13 @@ export default function BuddySystem() {
                     <h3 className="text-lg font-semibold">Your Matches</h3>
                     <Badge variant="secondary">{matches.length} active</Badge>
                   </div>
-                  
+
                   {matches.length === 0 ? (
                     <Card>
                       <CardContent className="pt-6 text-center">
-                        <p className="text-muted-foreground">No matches yet. Try discovering potential buddies!</p>
+                        <p className="text-muted-foreground">
+                          No matches yet. Try discovering potential buddies!
+                        </p>
                         <Button className="mt-4" onClick={handleFindMatches}>
                           Find Matches
                         </Button>
@@ -209,7 +216,7 @@ export default function BuddySystem() {
                     </Card>
                   ) : (
                     <div className="space-y-3">
-                      {matches.map(match => (
+                      {matches.map((match) => (
                         <Card key={match.id}>
                           <CardContent className="pt-4">
                             <div className="flex items-center justify-between">
@@ -218,7 +225,9 @@ export default function BuddySystem() {
                                   <AvatarFallback>M</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                  <div className="font-medium">Match #{match.id.slice(-6)}</div>
+                                  <div className="font-medium">
+                                    Match #{match.id.slice(-6)}
+                                  </div>
                                   <div className="text-sm text-muted-foreground">
                                     Score: {match.matchScore}% • {match.status}
                                   </div>
@@ -226,15 +235,17 @@ export default function BuddySystem() {
                               </div>
                               <div className="flex gap-2">
                                 {match.status === "pending" && (
-                                  <Button 
+                                  <Button
                                     size="sm"
-                                    onClick={() => updateMatchStatus(match.id, "accepted")}
+                                    onClick={() =>
+                                      updateMatchStatus(match.id, "accepted")
+                                    }
                                   >
                                     Accept
                                   </Button>
                                 )}
                                 {match.status === "accepted" && (
-                                  <Button 
+                                  <Button
                                     size="sm"
                                     onClick={() => setSelectedMatch(match.id)}
                                   >
@@ -257,15 +268,18 @@ export default function BuddySystem() {
                       Find New Matches
                     </Button>
                   </div>
-                  
+
                   <div className="grid gap-4 md:grid-cols-2">
-                    {potentialMatches.map(mentor => (
+                    {potentialMatches.map((mentor) => (
                       <Card key={mentor.id}>
                         <CardHeader>
                           <CardTitle className="text-base flex items-center gap-3">
                             <Avatar>
                               <AvatarFallback>
-                                {mentor.name.split(' ').map(n => n[0]).join('')}
+                                {mentor.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
                               </AvatarFallback>
                             </Avatar>
                             <div>
@@ -278,26 +292,38 @@ export default function BuddySystem() {
                         </CardHeader>
                         <CardContent className="space-y-3">
                           <div className="text-sm">{mentor.bio}</div>
-                          
+
                           {mentor.targetCountry && (
                             <div className="text-xs">
-                              <span className="text-muted-foreground">Target: </span>
+                              <span className="text-muted-foreground">
+                                Target:{" "}
+                              </span>
                               {mentor.targetCountry}
-                              {mentor.targetUniversity && ` • ${mentor.targetUniversity}`}
+                              {mentor.targetUniversity &&
+                                ` • ${mentor.targetUniversity}`}
                             </div>
                           )}
-                          
+
                           <div className="flex flex-wrap gap-1">
-                            {mentor.interests.slice(0, 3).map(interest => (
-                              <Badge key={interest} variant="outline" className="text-xs">
+                            {mentor.interests.slice(0, 3).map((interest) => (
+                              <Badge
+                                key={interest}
+                                variant="outline"
+                                className="text-xs"
+                              >
                                 {interest}
                               </Badge>
                             ))}
                           </div>
-                          
-                          <Button 
+
+                          <Button
                             className="w-full"
-                            onClick={() => handleSendMatch(mentor.id, (mentor as any).matchScore || 0)}
+                            onClick={() =>
+                              handleSendMatch(
+                                mentor.id,
+                                (mentor as any).matchScore || 0,
+                              )
+                            }
                           >
                             Send Match Request
                           </Button>
@@ -321,8 +347,7 @@ export default function BuddySystem() {
                     <CardTitle className="text-lg">Chat</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ChatSection 
-                      matchId={selectedMatch}
+                    <ChatSection
                       messages={messages}
                       onSendMessage={handleSendMessage}
                       currentUserId={user.uid}
@@ -340,52 +365,81 @@ export default function BuddySystem() {
             <DialogHeader>
               <DialogTitle>Create Buddy Profile</DialogTitle>
             </DialogHeader>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              handleCreateProfile(new FormData(e.currentTarget));
-            }} className="space-y-4">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreateProfile(new FormData(e.currentTarget));
+              }}
+              className="space-y-4"
+            >
               <div>
                 <label className="text-sm font-medium">Role</label>
-                <select name="role" className="w-full mt-1 p-2 border rounded-md" required>
+                <select
+                  name="role"
+                  className="w-full mt-1 p-2 border rounded-md"
+                  required
+                >
                   <option value="mentee">Looking for a mentor</option>
                   <option value="mentor">Want to be a mentor</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium">Program</label>
-                <select name="program" className="w-full mt-1 p-2 border rounded-md" required>
+                <select
+                  name="program"
+                  className="w-full mt-1 p-2 border rounded-md"
+                  required
+                >
                   <option value="Computer Science">Computer Science</option>
-                  <option value="Aeronautical Engineering">Aeronautical Engineering</option>
+                  <option value="Aeronautical Engineering">
+                    Aeronautical Engineering
+                  </option>
                   <option value="Mechatronics">Mechatronics</option>
                 </select>
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium">Current Year</label>
                 <Input name="year" type="number" min="1" max="4" required />
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium">Target Country</label>
-                <Input name="targetCountry" placeholder="e.g., USA, Germany, Australia" />
+                <Input
+                  name="targetCountry"
+                  placeholder="e.g., USA, Germany, Australia"
+                />
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium">Target University</label>
-                <Input name="targetUniversity" placeholder="e.g., UC Berkeley" />
+                <Input
+                  name="targetUniversity"
+                  placeholder="e.g., UC Berkeley"
+                />
               </div>
-              
+
               <div>
-                <label className="text-sm font-medium">Interests (comma-separated)</label>
-                <Input name="interests" placeholder="e.g., AI, Robotics, Web Development" required />
+                <label className="text-sm font-medium">
+                  Interests (comma-separated)
+                </label>
+                <Input
+                  name="interests"
+                  placeholder="e.g., AI, Robotics, Web Development"
+                  required
+                />
               </div>
-              
+
               <div>
                 <label className="text-sm font-medium">Bio</label>
-                <Textarea name="bio" placeholder="Tell others about yourself..." required />
+                <Textarea
+                  name="bio"
+                  placeholder="Tell others about yourself..."
+                  required
+                />
               </div>
-              
+
               <Button type="submit" className="w-full">
                 Create Profile
               </Button>
@@ -407,7 +461,10 @@ function ProfileSection({ profile }: { profile: BuddyProfile }) {
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12">
             <AvatarFallback>
-              {profile.name.split(' ').map(n => n[0]).join('')}
+              {profile.name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")}
             </AvatarFallback>
           </Avatar>
           <div>
@@ -417,29 +474,31 @@ function ProfileSection({ profile }: { profile: BuddyProfile }) {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <div className="text-sm">
             <span className="text-muted-foreground">Target: </span>
             {profile.targetCountry}
             {profile.targetUniversity && ` • ${profile.targetUniversity}`}
           </div>
-          
+
           <div className="text-sm">{profile.bio}</div>
-          
+
           <div className="flex flex-wrap gap-1">
-            {profile.interests.map(interest => (
+            {profile.interests.map((interest) => (
               <Badge key={interest} variant="outline" className="text-xs">
                 {interest}
               </Badge>
             ))}
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${profile.isAvailable ? 'bg-green-500' : 'bg-gray-400'}`} />
+          <div
+            className={`w-2 h-2 rounded-full ${profile.isAvailable ? "bg-green-500" : "bg-gray-400"}`}
+          />
           <span className="text-sm text-muted-foreground">
-            {profile.isAvailable ? 'Available for matching' : 'Not available'}
+            {profile.isAvailable ? "Available for matching" : "Not available"}
           </span>
         </div>
       </CardContent>
@@ -447,13 +506,11 @@ function ProfileSection({ profile }: { profile: BuddyProfile }) {
   );
 }
 
-function ChatSection({ 
-  matchId, 
-  messages, 
-  onSendMessage, 
-  currentUserId 
-}: { 
-  matchId: string;
+function ChatSection({
+  messages,
+  onSendMessage,
+  currentUserId,
+}: {
   messages: BuddyMessage[];
   onSendMessage: (content: string) => void;
   currentUserId: string;
@@ -469,28 +526,30 @@ function ChatSection({
   return (
     <div className="space-y-4">
       <div className="h-64 overflow-y-auto space-y-2 p-3 border rounded-lg">
-        {messages.map(message => (
-          <div 
-            key={message.id} 
-            className={`flex ${message.senderId === currentUserId ? 'justify-end' : 'justify-start'}`}
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${message.senderId === currentUserId ? "justify-end" : "justify-start"}`}
           >
-            <div className={`max-w-xs p-2 rounded-lg text-sm ${
-              message.senderId === currentUserId 
-                ? 'bg-primary text-primary-foreground' 
-                : 'bg-muted'
-            }`}>
+            <div
+              className={`max-w-xs p-2 rounded-lg text-sm ${
+                message.senderId === currentUserId
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted"
+              }`}
+            >
               {message.content}
             </div>
           </div>
         ))}
       </div>
-      
+
       <div className="flex gap-2">
         <Input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message..."
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          onKeyPress={(e) => e.key === "Enter" && handleSend()}
         />
         <Button onClick={handleSend}>Send</Button>
       </div>

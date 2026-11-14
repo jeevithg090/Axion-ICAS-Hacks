@@ -1,6 +1,5 @@
-import app from "./firebase";
+import { db, storage } from "./firebase";
 import {
-  getFirestore,
   collection,
   doc,
   getDocs,
@@ -13,7 +12,6 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import {
-  getStorage,
   ref,
   uploadBytes,
   getDownloadURL,
@@ -37,9 +35,6 @@ export type Upload = {
   createdAt: number;
   docId?: string;
 };
-
-const db = getFirestore(app);
-const storage = getStorage(app);
 
 export function userIdFromEmail(email: string) {
   return email.toLowerCase().replace(/[^a-z0-9._-]/g, "_");
@@ -147,7 +142,9 @@ export async function deleteUpload(
   try {
     const sref = ref(storage, uploadId);
     await deleteObject(sref);
-  } catch {}
+  } catch {
+    // The file may already be gone; still remove its metadata below.
+  }
   // We stored uploads as auto-id docs; need to find the doc with id field == uploadId and delete it
   const snap = await getDocs(uploadsCol(userId, courseId));
   const target = snap.docs.find((d) => (d.data() as Upload).id === uploadId);

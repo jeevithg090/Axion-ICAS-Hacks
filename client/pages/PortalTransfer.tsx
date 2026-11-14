@@ -1,3 +1,4 @@
+import type { ApiError, TransferAssistantResponse } from "@shared/api";
 import SEO from "@/components/SEO";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,8 @@ export default function PortalTransfer() {
         description: `${urgent.label} is ${formatDaysLeft(urgent.due)}.`,
       });
     }
+    // Notify once on page load only, not on every profile edit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const target = useMemo(
@@ -377,7 +380,6 @@ function UniversitiesTab({
 
 function DeadlinesTab({
   profileKey,
-  onChange,
 }: {
   profileKey: ReturnType<typeof loadTransferProfile>;
   onChange: (p: ReturnType<typeof loadTransferProfile>) => void;
@@ -452,31 +454,43 @@ function AssistantTab({
     },
   ]);
 
+  const [pending, setPending] = useState(false);
+
   async function ask() {
     const q = input.trim();
-    if (!q) return;
+    if (!q || pending) return;
     setMessages((m) => [...m, { role: "user", content: q }]);
     setInput("");
+    setPending(true);
     try {
       const res = await fetch("/api/transfer/assistant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q, context: { profile: profileKey } }),
       });
-      const data = await res.json();
-      const text = data.answer || "I couldn't generate a response.";
+      const data = (await res.json().catch(() => ({}))) as Partial<
+        TransferAssistantResponse & ApiError
+      >;
+      const text = res.ok
+        ? data.answer || "I couldn't generate a response."
+        : data.error || `The assistant is unavailable (HTTP ${res.status}).`;
       setMessages((m) => [...m, { role: "assistant", content: text }]);
-    } catch (e) {
+    } catch {
       setMessages((m) => [
         ...m,
         { role: "assistant", content: "Error contacting assistant." },
       ]);
+    } finally {
+      setPending(false);
     }
   }
 
   return (
     <div className="grid gap-3">
-      <div className="max-h-64 overflow-auto rounded-md border p-3">
+      <div
+        className="max-h-64 overflow-auto rounded-md border p-3"
+        aria-live="polite"
+      >
         {messages.map((m, i) => (
           <div key={i} className={m.role === "assistant" ? "" : "text-right"}>
             <div
@@ -487,15 +501,24 @@ function AssistantTab({
           </div>
         ))}
       </div>
-      <div className="flex gap-2">
+      <form
+        className="flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void ask();
+        }}
+      >
         <input
           className="flex-1 rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
           placeholder="Ask the assistant…"
+          aria-label="Ask the transfer assistant"
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
-        <Button onClick={ask}>Ask</Button>
-      </div>
+        <Button type="submit" disabled={pending || !input.trim()}>
+          {pending ? "Thinking…" : "Ask"}
+        </Button>
+      </form>
     </div>
   );
 }
