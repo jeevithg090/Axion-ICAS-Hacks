@@ -1,16 +1,57 @@
+import { useState, type FormEvent } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import SEO from "@/components/SEO";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext";
-import { useSearchParams } from "react-router-dom";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAuth, type AuthUser } from "@/context/AuthContext";
+import { homeFor, safeRedirect } from "@/lib/auth-users";
+
+type Mode = "signin" | "signup";
+
+const DEMO_ACCOUNTS = [
+  { label: "Continue as demo student", email: "student@icas.edu" },
+  { label: "Continue as demo admin", email: "admin@icas.edu" },
+] as const;
+const DEMO_PASSWORD = "icas123";
 
 export default function PortalLogin() {
-  const { login, signupStudent } = useAuth();
+  const { login, signupStudent, mode: authMode } = useAuth();
   const [params] = useSearchParams();
-  const next = params.get("next");
+  const navigate = useNavigate();
   const [error, setError] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [submitting, setSubmitting] = useState(false);
+  const [mode, setMode] = useState<Mode>("signin");
+
+  const goHome = (u: AuthUser) =>
+    navigate(safeRedirect(params.get("next"), homeFor(u.role)), {
+      replace: true,
+    });
+
+  async function run(action: () => Promise<AuthUser>, fallbackMessage: string) {
+    setError("");
+    setSubmitting(true);
+    try {
+      goHome(await action());
+    } catch (err) {
+      setError((err as Error)?.message || fallbackMessage);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    const email = String(fd.get("email") ?? "");
+    const password = String(fd.get("password") ?? "");
+    if (mode === "signin") {
+      void run(() => login(email, password), "Failed to sign in");
+    } else {
+      const name = String(fd.get("name") ?? "");
+      void run(() => signupStudent(name, email, password), "Failed to sign up");
+    }
+  }
 
   return (
     <main>
@@ -19,12 +60,13 @@ export default function PortalLogin() {
         description="Sign in or sign up (students) to access the portal."
       />
       <section className="container py-10">
-        <div className="flex items-end justify-between">
+        <div className="mx-auto max-w-sm">
           <h1 className="text-2xl font-bold tracking-tight">
             {mode === "signin" ? "Portal Login" : "Student Sign Up"}
           </h1>
           <button
-            className="text-sm text-primary underline-offset-4 hover:underline"
+            type="button"
+            className="mt-1 text-sm text-primary underline-offset-4 hover:underline"
             onClick={() => {
               setError("");
               setMode(mode === "signin" ? "signup" : "signin");
@@ -34,119 +76,85 @@ export default function PortalLogin() {
               ? "New student? Create an account"
               : "Already have an account? Sign in"}
           </button>
-        </div>
 
-        {mode === "signin" ? (
-          <form
-            className="mt-6 max-w-sm space-y-3"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setError("");
-              const fd = new FormData(e.currentTarget as HTMLFormElement);
-              try {
-                const u = await login(
-                  String(fd.get("email")),
-                  String(fd.get("password")),
-                );
-                const dest =
-                  next ?? (u.role === "admin" ? "/admin" : "/portal");
-                window.location.assign(dest);
-              } catch (err: any) {
-                setError(err?.message || "Failed to sign in");
-              }
-            }}
-          >
-            <Input name="email" type="email" placeholder="Email" required />
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password"
-              required
-            />
-            {error && <div className="text-sm text-destructive">{error}</div>}
-            <Button type="submit" className="w-full">
-              Sign in
+          <form className="mt-6 space-y-4" onSubmit={onSubmit}>
+            {mode === "signup" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="name">Full name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                />
+              </div>
+            )}
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                minLength={mode === "signup" ? 6 : undefined}
+                autoComplete={
+                  mode === "signin" ? "current-password" : "new-password"
+                }
+                required
+              />
+            </div>
+            {error && (
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
+            )}
+            <Button type="submit" className="w-full" disabled={submitting}>
+              {submitting
+                ? "Please wait…"
+                : mode === "signin"
+                  ? "Sign in"
+                  : "Create account"}
             </Button>
           </form>
-        ) : (
-          <form
-            className="mt-6 max-w-sm space-y-3"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setError("");
-              const fd = new FormData(e.currentTarget as HTMLFormElement);
-              try {
-                const u = await signupStudent(
-                  String(fd.get("name")),
-                  String(fd.get("email")),
-                  String(fd.get("password")),
-                );
-                const dest =
-                  next ?? (u.role === "admin" ? "/admin" : "/portal");
-                window.location.assign(dest);
-              } catch (err: any) {
-                setError(err?.message || "Failed to sign up");
-              }
-            }}
-          >
-            <Input name="name" type="text" placeholder="Full name" required />
-            <Input
-              name="email"
-              type="email"
-              placeholder="Student email"
-              required
-            />
-            <Input
-              name="password"
-              type="password"
-              placeholder="Password"
-              required
-            />
-            {error && <div className="text-sm text-destructive">{error}</div>}
-            <Button type="submit" className="w-full">
-              Create account
-            </Button>
-          </form>
-        )}
 
-        <div className="mt-8 max-w-sm space-y-3">
-          <div className="text-xs text-muted-foreground">
-            Or skip authentication:
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="secondary"
-              className="flex-1"
-              onClick={async () => {
-                try {
-                  const u = await login("student@icas.edu", "icas123");
-                  const dest =
-                    next ?? (u.role === "admin" ? "/admin" : "/portal");
-                  window.location.assign(dest);
-                } catch (err: any) {
-                  setError(err?.message || "Failed to skip as student");
-                }
-              }}
-            >
-              Skip as Student
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={async () => {
-                try {
-                  const u = await login("admin@icas.edu", "icas123");
-                  const dest =
-                    next ?? (u.role === "admin" ? "/admin" : "/portal");
-                  window.location.assign(dest);
-                } catch (err: any) {
-                  setError(err?.message || "Failed to skip as admin");
-                }
-              }}
-            >
-              Skip as Administrator
-            </Button>
-          </div>
+          {authMode === "demo" && (
+            <div className="mt-8 space-y-3 rounded-lg border border-dashed p-4">
+              <p className="text-xs text-muted-foreground">
+                Demo mode: accounts are stored in this browser only. Use a demo
+                account (password <code>{DEMO_PASSWORD}</code>) or create your
+                own.
+              </p>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                {DEMO_ACCOUNTS.map((a) => (
+                  <Button
+                    key={a.email}
+                    type="button"
+                    variant="secondary"
+                    className="flex-1"
+                    disabled={submitting}
+                    onClick={() =>
+                      run(
+                        () => login(a.email, DEMO_PASSWORD),
+                        "Demo login failed",
+                      )
+                    }
+                  >
+                    {a.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </main>

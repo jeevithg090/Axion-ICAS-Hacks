@@ -1,26 +1,24 @@
+import type { ReactElement } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
-import type { Role } from "@/context/AuthContext";
+import { useAuth, type Role } from "@/context/AuthContext";
+import { homeFor } from "@/lib/auth-users";
+import AuthLoading from "./AuthLoading";
 
+/** Renders children only for users with the given role. */
 export default function RequireRole({
   role,
   children,
 }: {
   role: Role;
-  children: JSX.Element;
+  children: ReactElement;
 }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const loc = useLocation();
-  if (!user)
-    return (
-      <Navigate
-        to={`/login?next=${encodeURIComponent(loc.pathname)}`}
-        replace
-      />
-    );
-  if (user.role !== role)
-    return (
-      <Navigate to={user.role === "admin" ? "/admin" : "/portal"} replace />
-    );
+  if (loading) return <AuthLoading />;
+  if (!user) {
+    const next = encodeURIComponent(loc.pathname + loc.search);
+    return <Navigate to={`/login?next=${next}`} replace />;
+  }
+  if (user.role !== role) return <Navigate to={homeFor(user.role)} replace />;
   return children;
 }

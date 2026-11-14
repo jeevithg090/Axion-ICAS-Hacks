@@ -1,31 +1,42 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, type FirebaseApp } from "firebase/app";
 import {
-  getAuth,
   browserLocalPersistence,
+  getAuth,
   setPersistence,
+  type Auth,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
-// Firebase configuration provided by the user
+/**
+ * Firebase web config, read from Vite env vars at build time (see .env.example).
+ * When the required values are missing the app runs in local demo mode and every
+ * Firebase-backed feature renders a "not configured" notice instead of crashing.
+ */
 const firebaseConfig = {
-  apiKey: "AIzaSyC6GNrqqndo61rHIFn_GkxxE2TIYibRMbw",
-  authDomain: "icasx-6b070.firebaseapp.com",
-  projectId: "icasx-6b070",
-  storageBucket: "icasx-6b070.firebasestorage.app",
-  messagingSenderId: "239419153027",
-  appId: "1:239419153027:web:09020403114639051659b6",
-  measurementId: "G-92YSFBW1KF",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+export const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId,
+);
 
-// Ensure auth persists across reloads
-setPersistence(auth, browserLocalPersistence).catch(() => {
-  // Ignore persistence errors and continue with default session persistence
-});
+// These are null in demo mode. Callers must check `isFirebaseConfigured`
+// (pages do so through <RequireFirebase>) before using them.
+export const app: FirebaseApp | null = isFirebaseConfigured
+  ? initializeApp(firebaseConfig)
+  : null;
+export const auth: Auth | null = app ? getAuth(app) : null;
+export const db: Firestore | null = app ? getFirestore(app) : null;
+export const storage: FirebaseStorage | null = app ? getStorage(app) : null;
 
-export default app;
+if (auth) {
+  // Keep users signed in across reloads; fall back to the default on failure.
+  setPersistence(auth, browserLocalPersistence).catch(() => undefined);
+}

@@ -1,0 +1,21 @@
+rules_version = '2';
+
+// Security rules for Firebase Storage uploads made by the client.
+// Deploy with: firebase deploy --only storage
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Study centre notes: studyCentre/{uid}/{courseId}/{file}
+    match /studyCentre/{uid}/{allPaths=**} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.size < 25 * 1024 * 1024;
+    }
+
+    // Transfer documents: transfers/{uid}/{file}
+    match /transfers/{uid}/{allPaths=**} {
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.size < 15 * 1024 * 1024;
+    }
+  }
+}
