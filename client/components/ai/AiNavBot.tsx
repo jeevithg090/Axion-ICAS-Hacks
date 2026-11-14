@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ThemeToggle from "@/components/theme/ThemeToggle";
+import { MessageCircle, Send, X } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -49,15 +49,37 @@ const ROUTES: { to: string; labels: string[] }[] = [
   },
 ];
 
+const LABELS: Record<string, string> = {
+  "/": "Home",
+  "/about": "About",
+  "/academics": "Academics",
+  "/research": "Research & Medicine",
+  "/student-life": "Student Life",
+  "/admissions-aid": "Admissions & Aid",
+  "/transfer": "Transfer (2+2)",
+  "/news": "News",
+  "/events": "Events",
+  "/faculty": "Faculty",
+  "/financial-aid": "Financial Aid",
+  "/medical-aid": "Medical Aid",
+  "/impact": "Impact",
+  "/contact": "Contact",
+  "/portal": "Student Portal",
+  "/portal/transfer": "Transfer Portal",
+  "/portal/study-centre": "Study Centre",
+  "/portal/planner": "Academic Planner",
+  "/portal/buddies": "Buddy System",
+  "/portal/research-hub": "Research Hub",
+};
+
+const labelFor = (to: string) => LABELS[to] ?? to;
+
 function matchRoutes(q: string) {
   const query = q.toLowerCase();
   const matches = ROUTES.filter((r) =>
     r.labels.some((l) => query.includes(l)),
   ).slice(0, 5);
-  return matches.map((m) => ({
-    label: m.to.split("/").slice(-1)[0] || "home",
-    to: m.to,
-  }));
+  return matches.map((m) => ({ label: labelFor(m.to), to: m.to }));
 }
 
 export default function AiNavBot() {
@@ -68,14 +90,30 @@ export default function AiNavBot() {
       role: "assistant",
       content:
         "Hi! I’m the ICAS navigator. Ask me to find pages, events, or resources—try ‘show upcoming events’ or ‘financial aid’.",
-      choices: ROUTES.slice(1, 4).map((r) => ({
-        label: r.to.replace("/", "") || "home",
-        to: r.to,
+      choices: ["/transfer", "/admissions-aid", "/events"].map((to) => ({
+        label: labelFor(to),
+        to,
       })),
     },
   ]);
   const navigate = useNavigate();
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
+  // Focus the input when opening; Escape closes and returns focus.
+  useEffect(() => {
+    if (!open) return;
+    inputRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
   useEffect(() => {
     listRef.current?.scrollTo({
@@ -115,29 +153,50 @@ export default function AiNavBot() {
     [],
   );
 
+  const go = (to: string) => {
+    navigate(to);
+    setOpen(false);
+  };
+
+  const chip =
+    "rounded-full border bg-background px-3 py-1.5 text-xs font-medium hover:border-primary/50 hover:bg-accent hover:text-accent-foreground";
+
   return (
-    <div aria-live="polite" className="fixed bottom-4 right-4 z-50">
-      {/* Panel */}
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
       {open && (
-        <div className="mb-3 w-[min(92vw,380px)] overflow-hidden rounded-xl bg-card shadow-soft ring-1 ring-border">
-          <div className="flex items-center justify-between border-b p-3">
-            <div className="text-sm font-semibold">ICAS Navigator</div>
+        <section
+          id="icas-navigator"
+          aria-label="ICAS Navigator"
+          className="mb-3 w-[min(calc(100vw-2rem),380px)] animate-fade-up overflow-hidden rounded-2xl border bg-card shadow-lift"
+        >
+          <div className="flex items-center justify-between gap-2 border-b bg-muted/40 px-4 py-3">
+            <div>
+              <h2 className="text-sm font-semibold">ICAS Navigator</h2>
+              <p className="text-xs text-muted-foreground">
+                Type a topic and jump to the right page
+              </p>
+            </div>
             <button
-              className="rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-muted"
+              type="button"
+              className="inline-grid h-9 w-9 place-items-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
               onClick={() => setOpen(false)}
               aria-label="Close navigator"
             >
-              Close
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
-          <div ref={listRef} className="max-h-72 space-y-3 overflow-auto p-3">
+          <div
+            ref={listRef}
+            aria-live="polite"
+            className="max-h-72 space-y-3 overflow-auto p-4"
+          >
             {messages.map((m, i) => (
               <div
                 key={i}
                 className={m.role === "assistant" ? "" : "text-right"}
               >
                 <div
-                  className={`inline-block rounded-lg px-3 py-2 text-sm ${m.role === "assistant" ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"}`}
+                  className={`inline-block max-w-[85%] rounded-2xl px-3 py-2 text-left text-sm ${m.role === "assistant" ? "rounded-tl-sm bg-muted text-foreground" : "rounded-tr-sm bg-primary text-primary-foreground"}`}
                 >
                   {m.content}
                 </div>
@@ -146,13 +205,11 @@ export default function AiNavBot() {
                     {m.choices.map((c) => (
                       <button
                         key={c.to}
-                        className="rounded-md border px-2 py-1 text-xs hover:bg-muted"
-                        onClick={() => {
-                          navigate(c.to);
-                          setOpen(false);
-                        }}
+                        type="button"
+                        className={chip}
+                        onClick={() => go(c.to)}
                       >
-                        {c.label || "open"}
+                        {c.label}
                       </button>
                     ))}
                   </div>
@@ -161,52 +218,61 @@ export default function AiNavBot() {
             ))}
           </div>
           <form onSubmit={handleSubmit} className="flex gap-2 border-t p-3">
+            <label htmlFor="icas-navigator-input" className="sr-only">
+              What are you looking for?
+            </label>
             <input
-              aria-label="Ask ICAS"
-              className="flex-1 rounded-md border bg-background px-3 py-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              placeholder="Ask to navigate…"
+              id="icas-navigator-input"
+              ref={inputRef}
+              className="field flex-1"
+              placeholder="e.g. scholarships, visa, GPA"
+              autoComplete="off"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
             <button
               type="submit"
-              className="rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:brightness-110"
+              aria-label="Search"
+              disabled={!input.trim()}
+              className="inline-grid h-10 w-10 shrink-0 place-items-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
-              Go
+              <Send className="h-4 w-4" aria-hidden="true" />
             </button>
           </form>
-          <div className="border-t p-3">
-            <div className="flex flex-wrap gap-2">
-              {quick.map((q) => (
-                <button
-                  key={q.to}
-                  className="rounded-md border px-2 py-1 text-xs hover:bg-muted"
-                  onClick={() => {
-                    navigate(q.to);
-                    setOpen(false);
-                  }}
-                >
-                  {q.label}
-                </button>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-2 border-t px-3 py-3">
+            <span className="sr-only">Quick links:</span>
+            {quick.map((q) => (
+              <button
+                key={q.to}
+                type="button"
+                className={chip}
+                onClick={() => go(q.to)}
+              >
+                {q.label}
+              </button>
+            ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* Toggles row */}
-      <div className="flex items-center justify-end gap-2">
-        <ThemeToggle />
-        <button
-          className="flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          onClick={() => setOpen((o) => !o)}
-          aria-expanded={open}
-          aria-controls="icas-navigator"
-        >
-          <span className="h-2 w-2 animate-pulse rounded-full bg-accent" />
-          Ask ICAS
-        </button>
-      </div>
+      <button
+        ref={toggleRef}
+        type="button"
+        className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-lift hover:-translate-y-0.5 hover:bg-primary/90"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls="icas-navigator"
+        aria-label={
+          open ? "Close ICAS Navigator" : "Ask ICAS: open the navigator"
+        }
+      >
+        {open ? (
+          <X className="h-5 w-5" aria-hidden="true" />
+        ) : (
+          <MessageCircle className="h-5 w-5" aria-hidden="true" />
+        )}
+        <span className="hidden sm:inline">Ask ICAS</span>
+      </button>
     </div>
   );
 }

@@ -1,11 +1,15 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Menu } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut, Menu } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { homeFor } from "@/lib/auth-users";
+import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/theme/ThemeToggle";
+import Logo from "./Logo";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -14,12 +18,11 @@ import {
 const nav = [
   { to: "/about", label: "About" },
   { to: "/academics", label: "Academics" },
-  { to: "/admissions-aid", label: "Admissions/Aid" },
-  { to: "/enigma", label: "Enigma" },
-  { to: "/student-life", label: "Student Life" },
-  { to: "/contact", label: "Contact" },
+  { to: "/admissions-aid", label: "Admissions & Aid" },
   { to: "/transfer", label: "Transfer" },
-  { to: "/portal", label: "Portal" },
+  { to: "/student-life", label: "Student Life" },
+  { to: "/enigma", label: "Enigma" },
+  { to: "/contact", label: "Contact" },
 ];
 
 export default function Header() {
@@ -39,143 +42,171 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // On the home page the header floats over the dark hero until you scroll.
   const transparent = isHome && !scrolled;
+  const dashboard = user ? homeFor(user.role) : "/login";
+  const dashboardLabel = user?.role === "admin" ? "Admin" : "Portal";
+
+  const pill = transparent
+    ? "border border-white/25 bg-white/10 text-white hover:bg-white/20"
+    : "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90";
 
   return (
     <header
-      className={
+      className={cn(
+        "top-0 z-40 w-full transition-[background-color,border-color,box-shadow] duration-200",
         transparent
-          ? "absolute inset-x-0 top-0 z-40 w-full border-transparent bg-transparent text-white"
-          : "sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
-      }
+          ? "absolute inset-x-0 border-b border-transparent text-white"
+          : "sticky border-b bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/70",
+      )}
     >
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground"
       >
         Skip to content
       </a>
 
-      {/* Topbar */}
-      <div
-        className={`${transparent ? "text-white/90" : "text-muted-foreground"} hidden border-b/0 text-xs md:block`}
-      >
-        <div className="container flex h-9 items-center justify-between">
-          <div className="flex items-center gap-4">
-            <a href="mailto:hello@icas.edu" className="hover:underline">
-              hello@icas.edu
-            </a>
-            <a href="tel:+918012345678" className="hover:underline">
-              +91 80 1234 5678
-            </a>
-          </div>
-        </div>
-      </div>
+      <div className="container flex h-16 items-center justify-between gap-4">
+        <Logo inverted={transparent} />
 
-      <div className="container flex h-16 items-center justify-between gap-6">
-        <Link
-          to="/"
-          className={`flex items-center gap-2 font-extrabold tracking-tight ${transparent ? "text-white" : "text-primary"}`}
-        >
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets%2F766318eacea44b40bcc70d9d860cc3ef%2Ff91793dcf37543a2b5a1a15981fd005e?format=webp&width=80"
-            alt="ICAS logo"
-            className="h-7 w-7 rounded-sm object-contain"
-            loading="eager"
-            width="28"
-            height="28"
-          />
-          ICAS
-        </Link>
         <nav
           aria-label="Main"
-          className="hidden items-center gap-5 text-sm font-medium md:flex"
+          className="hidden items-center gap-1 text-sm font-medium lg:flex"
         >
           {nav.map((n) => (
             <NavLink
               key={n.to}
               to={n.to}
               className={({ isActive }) =>
-                `rounded-md px-2 py-1 transition-colors ${
+                cn(
+                  "rounded-md px-3 py-2",
                   transparent
-                    ? `text-white/90 hover:text-white ${isActive ? "underline underline-offset-4" : ""}`
-                    : `hover:text-primary ${isActive ? "text-primary" : "text-muted-foreground"}`
-                }`
+                    ? cn(
+                        "text-white/85 hover:bg-white/10 hover:text-white",
+                        isActive && "bg-white/15 text-white",
+                      )
+                    : cn(
+                        "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        isActive && "bg-muted text-foreground",
+                      ),
+                )
               }
             >
               {n.label}
             </NavLink>
           ))}
         </nav>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-1 sm:gap-2">
+          <ThemeToggle
+            className={transparent ? "text-white hover:bg-white/10" : ""}
+          />
+
+          <Link
+            to={dashboard}
+            className={cn(
+              "inline-flex h-10 items-center gap-2 rounded-md px-3 text-sm font-semibold sm:px-4",
+              pill,
+            )}
+          >
+            {user ? (
+              <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <LogIn className="h-4 w-4" aria-hidden="true" />
+            )}
+            {user ? dashboardLabel : "Log in"}
+          </Link>
+
+          {user && (
+            <button
+              type="button"
+              onClick={() => void logout()}
+              className={cn(
+                "hidden h-10 items-center gap-2 rounded-md px-3 text-sm font-medium sm:inline-flex",
+                transparent
+                  ? "text-white/90 hover:bg-white/10"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <LogOut className="h-4 w-4" aria-hidden="true" />
+              Log out
+            </button>
+          )}
+
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
             <SheetTrigger asChild>
               <button
                 type="button"
                 aria-label="Open menu"
-                className={`rounded-md p-2 md:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${transparent ? "text-white" : ""}`}
+                className={cn(
+                  "inline-grid h-10 w-10 place-items-center rounded-md lg:hidden",
+                  transparent
+                    ? "text-white hover:bg-white/10"
+                    : "hover:bg-muted",
+                )}
               >
                 <Menu className="h-5 w-5" aria-hidden="true" />
               </button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72">
-              <SheetHeader>
-                <SheetTitle>ICAS</SheetTitle>
+            <SheetContent side="right" className="flex w-80 flex-col">
+              <SheetHeader className="text-left">
+                <SheetTitle>
+                  <span className="inline-flex items-center gap-2.5">
+                    <img src="/logo.svg" alt="" className="h-7 w-7" />
+                    ICAS
+                  </span>
+                </SheetTitle>
+                <SheetDescription>
+                  {user
+                    ? `Signed in as ${user.name || user.email}`
+                    : "International Center for Applied Science"}
+                </SheetDescription>
               </SheetHeader>
               <nav
                 aria-label="Mobile"
-                className="mt-6 grid gap-1 text-sm font-medium"
+                className="mt-4 grid gap-1 text-base font-medium"
               >
                 {nav.map((n) => (
                   <NavLink
                     key={n.to}
                     to={n.to}
                     className={({ isActive }) =>
-                      `rounded-md px-3 py-2 transition-colors hover:bg-muted ${isActive ? "text-primary" : "text-foreground"}`
+                      cn(
+                        "rounded-md px-3 py-3 hover:bg-muted",
+                        isActive ? "bg-muted text-primary" : "text-foreground",
+                      )
                     }
                   >
                     {n.label}
                   </NavLink>
                 ))}
               </nav>
+              <div className="mt-auto grid gap-2 border-t pt-4">
+                <Link
+                  to={dashboard}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  {user ? (
+                    <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <LogIn className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  {user ? `Open ${dashboardLabel}` : "Log in to the portal"}
+                </Link>
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => void logout()}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium hover:bg-muted"
+                  >
+                    <LogOut className="h-4 w-4" aria-hidden="true" />
+                    Log out
+                  </button>
+                )}
+              </div>
             </SheetContent>
           </Sheet>
-          {!user ? (
-            <Link
-              to="/login"
-              className={
-                transparent
-                  ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                  : "rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              }
-            >
-              Login
-            </Link>
-          ) : (
-            <>
-              <Link
-                to={homeFor(user.role)}
-                className={
-                  transparent
-                    ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white shadow-soft transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                    : "rounded-md bg-secondary px-3 py-1.5 text-sm font-semibold text-secondary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                }
-              >
-                {user.role === "admin" ? "Admin" : "Portal"}
-              </Link>
-              <button
-                type="button"
-                onClick={() => void logout()}
-                className={
-                  transparent
-                    ? "rounded-md border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/90 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                    : "rounded-md border px-3 py-1.5 text-sm font-semibold transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                }
-              >
-                Logout
-              </button>
-            </>
-          )}
         </div>
       </div>
     </header>
