@@ -4,17 +4,35 @@ import path from "path";
 import { createServer } from "./server";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   server: {
-    host: "::",
+    host: true,
     port: 8080,
     fs: {
-      allow: ["./client", "./shared"],
+      allow: ["./client", "./shared", "./index.html"],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
   },
   build: {
     outDir: "dist/spa",
+    rollupOptions: {
+      output: {
+        // Long-lived vendor chunks that change far less often than app code.
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return undefined;
+          if (/[\\/](firebase|@firebase|@grpc|protobufjs)[\\/]/.test(id))
+            return "firebase";
+          if (
+            /[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(
+              id,
+            )
+          ) {
+            return "react";
+          }
+          return undefined;
+        },
+      },
+    },
   },
   plugins: [react(), expressPlugin()],
   resolve: {
