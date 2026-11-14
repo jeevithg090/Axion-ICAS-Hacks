@@ -1,158 +1,149 @@
 import type { RequestHandler } from "express";
 import type { DelegateSummaryResponse, MeetingSummary } from "@shared/api";
+import { inferFilename, sanitizeFilename } from "../lib/audio";
+import { HttpError, toErrorResponse } from "../lib/errors";
+import {
+  chatCompletion,
+  getOpenRouterKey,
+  parseModelJson,
+} from "../lib/openrouter";
 
-function inferFilename(contentType?: string, fallback = "audio") {
-  const ext = contentType?.includes("wav")
-    ? "wav"
-    : contentType?.includes("mp3")
-      ? "mp3"
-      : contentType?.includes("mpeg")
-        ? "mp3"
-        : contentType?.includes("m4a")
-          ? "m4a"
-          : contentType?.includes("ogg")
-            ? "ogg"
-            : contentType?.includes("webm")
-              ? "webm"
-              : "bin";
-  return `${fallback}.${ext}`;
+const ELEVENLABS_STT_URL = "https://api.elevenlabs.io/v1/speech-to-text";
+
+/** Models tried in order until one succeeds. Override with OPENROUTER_SUMMARY_MODELS. */
+const DEFAULT_SUMMARY_MODELS = [
+  "meta-llama/llama-3.1-70b-instruct:free",
+  "meta-llama/llama-3.1-8b-instruct:free",
+  "google/gemini-2.0-flash-001",
+  "openai/gpt-4o-mini",
+  "mistralai/mistral-small",
+  "deepseek/deepseek-chat",
+];
+
+function summaryModels(): string[] {
+  const fromEnv = process.env.OPENROUTER_SUMMARY_MODELS?.split(",")
+    .map((m) => m.trim())
+    .filter(Boolean);
+  return fromEnv?.length ? fromEnv : DEFAULT_SUMMARY_MODELS;
 }
 
-async function transcribeWithElevenLabs(
+const SYSTEM_PROMPT =
+  "You are a helpful meeting summarizer. Produce accurate, structured summaries with actionability for students and staff.";
+
+export function buildSummaryPrompt(transcript: string): string {
+  return `Generate a structured JSON summary of this meeting transcript.
+
+Requirements:
+- Output STRICT JSON only (no markdown, no code fences).
+- Use this schema with keys: {
+  title?: string,
+  summary: string,
+  attendees?: string[],
+  agenda?: string[],
+  decisions?: string[],
+  action_items?: { owner: string, task: string, due_date?: string }[],
+  risks?: string[],
+  next_steps?: string[],
+  timeline?: { timestamp?: string, note: string }[]
+}.
+- Be concise but cover: goals, key discussion points, decisions, action items (owners, deadlines), risks, and next steps.
+- Include a short timeline capturing notable moments if possible.
+
+Transcript:
+${transcript}`;
+}
+
+async function transcribe(
   audio: Buffer,
   contentType: string,
   filename: string,
-): Promise<{ text: string } & Record<string, any>> {
+) {
   const key = process.env.ELEVENLABS_API_KEY;
-  if (!key) throw new Error("ELEVENLABS_API_KEY is not set");
+  if (!key)
+    throw new HttpError(503, "Transcription is not configured on this server");
 
-  const fd = new FormData();
-  const blob = new Blob([audio], {
-    type: contentType || "application/octet-stream",
-  });
-  fd.append("model_id", "scribe_v1");
-  fd.append("language_code", "en");
-  fd.append("tag_audio_events", "true");
-  fd.append("diarize", "true");
-  fd.append("file", blob, filename);
+  const form = new FormData();
+  form.append("model_id", "scribe_v1");
+  form.append("language_code", "en");
+  form.append("tag_audio_events", "true");
+  form.append("diarize", "true");
+  form.append(
+    "file",
+    new Blob([new Uint8Array(audio)], { type: contentType }),
+    filename,
+  );
 
-  const resp = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
+  const resp = await fetch(ELEVENLABS_STT_URL, {
     method: "POST",
     headers: { "xi-api-key": key },
-    body: fd,
+    body: form,
+    signal: AbortSignal.timeout(120_000),
   });
-
   if (!resp.ok) {
-    const t = await resp.text();
-    throw new Error(`ElevenLabs STT failed: ${resp.status} ${t}`);
+    const detail = await resp.text().catch(() => "");
+    throw new Error(
+      `ElevenLabs STT failed: HTTP ${resp.status} ${detail.slice(0, 500)}`,
+    );
   }
-  const data = await resp.json();
-  const text: string = data?.text ?? "";
-  return { text, ...data };
+  const data = (await resp.json()) as { text?: string };
+  return data?.text ?? "";
 }
 
-async function summarizeWithOpenRouter(transcript: string) {
-  const key = process.env.OPENROUTER_API_KEY;
-  if (!key) throw new Error("OPENROUTER_API_KEY is not set");
-
-  const models = [
-    "meta-llama/llama-3.1-70b-instruct:free",
-    "meta-llama/llama-3.1-8b-instruct:free",
-    "google/gemini-2.0-flash-001",
-    "openai/gpt-4o-mini",
-    "mistralai/mistral-small",
-    "deepseek/deepseek-chat",
-  ];
-
-  const system =
-    "You are a helpful meeting summarizer. Produce accurate, structured summaries with actionability for students and staff.";
-  const user = `Generate a structured JSON summary of this meeting transcript.\n\nRequirements:\n- Output STRICT JSON only (no markdown, no code fences).\n- Use this schema with keys: {\n  title?: string,\n  summary: string,\n  attendees?: string[],\n  agenda?: string[],\n  decisions?: string[],\n  action_items?: { owner: string, task: string, due_date?: string }[],\n  risks?: string[],\n  next_steps?: string[],\n  timeline?: { timestamp?: string, note: string }[]\n}.\n- Be concise but cover: goals, key discussion points, decisions, action items (owners, deadlines), risks, and next steps.\n- Include a short timeline capturing notable moments if possible.\n\nTranscript:\n${transcript}`;
-
-  let lastErr: any = null;
-  for (const model of models) {
+async function summarize(transcript: string) {
+  let lastErr: unknown = null;
+  for (const model of summaryModels()) {
     try {
-      const resp = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${key}`,
-            "HTTP-Referer": "https://builder.io",
-            "X-Title": "ICAS Delegate Sessions Summary",
-          },
-          body: JSON.stringify({
-            model,
-            messages: [
-              { role: "system", content: system },
-              { role: "user", content: user },
-            ],
-            temperature: 0.2,
-            max_tokens: 1200,
-          }),
-        },
-      );
-      if (!resp.ok) {
-        lastErr = new Error(`OpenRouter ${model} HTTP ${resp.status}`);
-        continue;
-      }
-      const data = await resp.json();
-      const content: string = data?.choices?.[0]?.message?.content ?? "";
-      if (!content) throw new Error("Empty LLM response");
-
-      // Attempt to parse strict JSON; also strip accidental code fences
-      const jsonText = content
-        .replace(/^```json\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .trim();
-      let parsed: MeetingSummary | null = null;
-      try {
-        parsed = JSON.parse(jsonText);
-      } catch {
-        parsed = null;
-      }
-      return { model, content, parsed };
-    } catch (e) {
-      lastErr = e;
-      continue;
+      const content = await chatCompletion({
+        model,
+        title: "ICAS Delegate Sessions Summary",
+        maxTokens: 1200,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: buildSummaryPrompt(transcript) },
+        ],
+      });
+      return {
+        model,
+        content,
+        parsed: parseModelJson<MeetingSummary>(content),
+      };
+    } catch (err) {
+      lastErr = err;
     }
   }
-  throw lastErr || new Error("All OpenRouter models failed");
+  throw lastErr ?? new Error("All summary models failed");
 }
 
 export const handleDelegateSummary: RequestHandler = async (req, res) => {
   try {
-    const contentType =
-      (req.headers["content-type"] as string) || "application/octet-stream";
-    const filename =
-      (req.headers["x-filename"] as string) ||
-      inferFilename(contentType, "meeting");
+    if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+      throw new HttpError(400, "Audio file required (binary request body).");
+    }
+    const contentType = req.get("content-type") || "application/octet-stream";
+    if (!/^(audio|video)\/|^application\/octet-stream/i.test(contentType)) {
+      throw new HttpError(415, "Unsupported media type; upload an audio file.");
+    }
+    // Fail fast before spending a transcription call.
+    getOpenRouterKey();
 
-    if (!Buffer.isBuffer(req.body) || !req.body.length) {
-      return res
-        .status(400)
-        .json({ error: "Audio file required (binary body)." });
+    const filename =
+      sanitizeFilename(req.get("x-filename")) ??
+      inferFilename(contentType, "meeting");
+    const transcript = await transcribe(req.body, contentType, filename);
+    if (!transcript.trim()) {
+      throw new HttpError(422, "No speech could be detected in the recording.");
     }
 
-    const stt = await transcribeWithElevenLabs(
-      req.body as Buffer,
-      contentType,
-      filename,
-    );
-
-    const { model, content, parsed } = await summarizeWithOpenRouter(
-      stt.text || "",
-    );
-
-    const payload: DelegateSummaryResponse = {
-      transcript: stt.text || "",
+    const { model, content, parsed } = await summarize(transcript);
+    const body: DelegateSummaryResponse = {
+      transcript,
       summary: parsed ?? content,
       modelUsed: model,
     };
-
-    res.json(payload);
-  } catch (e: any) {
-    res.status(500).json({ error: e?.message || "unknown" });
+    res.json(body);
+  } catch (err) {
+    if (!(err instanceof HttpError)) console.error("[delegate-summary]", err);
+    const { status, body } = toErrorResponse(err);
+    res.status(status).json(body);
   }
 };
