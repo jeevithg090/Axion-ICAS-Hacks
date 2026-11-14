@@ -1,216 +1,197 @@
-# 🎓 Student Life Assistant - ICAS Platform
+# ICAS Student Life Assistant
 
-<div align="center">
+A web platform for students of ICAS (International Centre for Applied Sciences, Manipal), built by **Team AXION** for the Enigma Hackathon 2025.
 
-![ICAS Platform](https://img.shields.io/badge/ICAS-Student%20Platform-blue?style=for-the-badge)
-![Hackathon](https://img.shields.io/badge/Enigma%20Hackathon-2025-orange?style=for-the-badge)
-![Team](https://img.shields.io/badge/Team-AXION-green?style=for-the-badge)
+ICAS students follow a **2+2 transfer program**: two years in India, then two years at a partner university abroad. The transfer means deadlines, documents, eligibility rules and a lot of scattered information. This project puts the transfer process, study tools and campus information in one place. Two server-side AI features handle the tedious parts: a transfer Q&A assistant and automatic summaries of recorded meetings.
 
-*Revolutionizing the ICAS student experience through intelligent automation and seamless connectivity*
+> **Challenge:** _"Build something that improves the daily life of ICAS students."_
 
-[🔗 Live Demo](#demo) • [📖 Documentation](#documentation) • [🚀 Quick Start](#quick-start) • [👥 Team](#team)
+## Team AXION
 
-</div>
+Jeevith · Shiva Teja · Ali · Charan · Hitesh
 
----
+## Features
 
-## 🏆 Enigma Hackathon 2025 - Project Report
+### Public site
 
-### 👥 Team AXION
-- **JEEVITH** - Full Stack Developer
-- **SHIVA TEJA** - Backend Architect  
-- **ALI** - Frontend Specialist
-- **CHARAN** - Research & Analytics
-- **HITESH** - DevOps & Integration
+- Home, About, Academics, Research, Student Life, Events, News, Faculty, Admissions & Aid, Financial/Medical Aid, Impact and Contact pages
+- An explainer for the 2+2 transfer pathway, with an interactive partner-university map
+- Light/dark theme, responsive layout with a mobile navigation drawer, skip-to-content link
+- **"Ask ICAS"**: a floating helper that maps what you type (e.g. "scholarships", "visa", "gpa") to the right page
 
----
+### Student portal (`/portal`, sign-in required)
 
-## 🎯 Problem Statement
+| Feature                                                                                                                                                                                             | Route                  | Storage                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | -------------------------------------------------------------- |
+| Dashboard: deadlines, assignments, announcements, grades, calendar                                                                                                                                  | `/portal`              | Sample data                                                    |
+| Courses and assignment submissions                                                                                                                                                                  | `/portal/courses`      | Browser `localStorage`                                         |
+| **Smart Transfer Portal**: document checklist with file-name validation, eligibility check against partner-university GPA cutoffs, deadline alerts, progress score, timeline, AI Transfer Assistant | `/portal/transfer`     | `localStorage` in demo mode, Firestore + Storage with Firebase |
+| **Delegate Sessions Summary**: upload a meeting recording and get a transcript plus a structured summary (decisions, action items, risks, next steps)                                               | `/portal`              | Processed server-side, not stored                              |
+| **Study Centre**: per-course syllabus, rich-text notes, file uploads                                                                                                                                | `/portal/study-centre` | Firebase                                                       |
+| **Academic Planner**: GPA calculator, what-if scenarios, course recommendations by prerequisite and semester, transfer-credit check                                                                 | `/portal/planner`      | Firebase                                                       |
+| **Buddy System**: mentor/mentee profiles, matching, chat                                                                                                                                            | `/portal/buddies`      | Firebase                                                       |
+| **Research Hub**: post projects, apply, team updates                                                                                                                                                | `/portal/research-hub` | Firebase                                                       |
+| Admin dashboard (admins only, placeholder cards)                                                                                                                                                    | `/admin`               | —                                                              |
 
-**Challenge:** *"Build something that improves the daily life of ICAS students."*
+## Tech stack
 
-At ICAS (Manipal), students navigate a unique **2+2 transfer program** where they spend their first two years in India and final two years abroad. This model creates distinct challenges:
+- **Frontend:** React 18, TypeScript, Vite 7, React Router 7, Tailwind CSS 3, Radix UI / shadcn/ui, Lucide icons, TanStack Query
+- **Backend:** Express 5 (integrated into the Vite dev server; standalone Node server or Netlify Function in production), Zod validation, `express-rate-limit`
+- **Data and auth:** Firebase Authentication, Cloud Firestore and Firebase Storage. Without Firebase the app falls back to a local demo mode.
+- **AI services:** [OpenRouter](https://openrouter.ai) for LLM chat and summarization, [ElevenLabs](https://elevenlabs.io) Scribe for speech-to-text
+- **Tooling:** pnpm, Vitest + Supertest, ESLint (typescript-eslint, react-hooks), Prettier
 
-### 🔍 Key Pain Points Identified
-
-| **Student Challenges** | **Administrative Challenges** |
-|------------------------|------------------------------|
-| 📋 Complex foreign transfer process | 📊 Heavy manual workload in event management |
-| 🔗 Lack of structured peer/alumni connections | 📝 Time-consuming communication processes |
-| ⏰ Managing multiple deadlines & requirements | 📁 Inefficient student transfer tracking |
-| 📚 Scattered academic resources | 📈 Limited data insights for decision-making |
-
----
-
-## 💡 Solution Overview
-
-We developed the **Student Life Assistant** - a comprehensive web platform designed specifically for ICAS with dual objectives:
-
-<div align="center">
-
-```mermaid
-graph TB
-    A[Student Life Assistant] --> B[Student Features]
-    A --> C[Admin Features]
-    B --> D[Smart Transfer Portal]
-    B --> E[Unified Student Hub]
-    B --> F[Meeting Archive Access]
-    C --> G[Management Dashboard]
-    C --> H[Event Management]
-    C --> I[AI Communication]
-    C --> J[Analytics Dashboard]
-```
-
-</div>
-
----
-
-## ✨ Key Features
-
-### 🎓 Student-Focused Features
-
-#### 📱 Smart Transfer Portal
-- **Comprehensive Tracker**: Deadlines, documents, visa submissions
-- **Automated Notifications**: Never miss critical steps
-- **Progress Visualization**: Real-time transfer journey tracking
-- **Document Management**: Secure upload and verification system
-
-#### 🏠 Unified Student Hub
-- **Centralized Resources**: All academic and campus resources in one place
-- **Quick Access Dashboard**: Streamlined navigation to essential tools
-- **Personalized Experience**: Tailored content based on student year and program
-
-#### 📹 Delegate Meeting Archive
-- **Smart Search**: Find specific topics across all recorded sessions
-- **Automatic Transcription**: AI-powered content indexing
-- **Guest Lecture Library**: Organized repository of educational content
-
-### 👨‍💼 Administrator-Focused Features
-
-#### 📊 Application Management Dashboard
-- **Real-time Tracking**: Student transfer requests and document status
-- **Verification Workflow**: Streamlined approval processes
-- **Bulk Operations**: Efficient handling of multiple applications
-
-#### 🎉 Event Management Suite
-- **One-Click Creation**: Rapid event setup and scheduling
-- **Smart Reminders**: Automated notifications to participants
-- **Room Booking Integration**: Seamless venue management
-- **Auto-Generated Invitations**: Professional event communications
-
-#### 🤖 AI-Powered Communication
-- **Instant Announcements**: Transform bullet points into polished notices
-- **Multi-format Generation**: Emails, circulars, and official communications
-- **Template Library**: Pre-built formats for common communications
-
-#### 📈 Analytics & Insights Dashboard
-- **Transfer Trends**: Data-driven insights into student patterns
-- **Success Metrics**: Alumni achievement tracking
-- **Participation Analytics**: Event and program engagement statistics
-- **Predictive Analytics**: Early identification of at-risk students
-
----
-
-## 🛠️ Technology Stack
-
-<div align="center">
-
-| **Category** | **Technology** | **Purpose** |
-|--------------|----------------|-------------|
-| **Frontend** | ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black) ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white) | Fast, modern UI development |
-| **Backend** | ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black) | Authentication, Firestore DB, Storage |
-| **AI/ML** | ![OpenAI](https://img.shields.io/badge/OpenRouter-412991?style=flat&logo=openai&logoColor=white) | LLM integration with RAG pipelines |
-| **Automation** | ![MCP](https://img.shields.io/badge/MCP-Servers-blue?style=flat) | Structured query handling |
-| **Styling** | ![Tailwind](https://img.shields.io/badge/Tailwind-38B2AC?style=flat&logo=tailwind-css&logoColor=white) | Responsive design system |
-
-</div>
-
-### 🏗️ Architecture Overview
+## Architecture
 
 ```mermaid
 graph LR
-    A[React Frontend] --> B[Firebase Auth]
-    A --> C[Firestore DB]
-    A --> D[MCP Servers]
-    D --> E[OpenRouter LLM]
-    E --> F[RAG Pipeline]
-    C --> G[Real-time Updates]
-    B --> H[Role-based Access]
+    subgraph Browser
+      SPA[React SPA]
+    end
+    subgraph Server["Express API (/api)"]
+      TA[/transfer/assistant/]
+      DS[/delegate/summary/]
+    end
+    SPA -->|Auth, Firestore, Storage| FB[(Firebase)]
+    SPA -->|fetch /api/*| Server
+    TA --> OR[OpenRouter LLM]
+    DS --> EL[ElevenLabs STT]
+    DS --> OR
 ```
 
----
+- The React SPA talks to Firebase directly from the browser. Data access is controlled by the Firestore and Storage **security rules** in [`firestore.rules`](firestore.rules) and [`storage.rules`](storage.rules).
+- The Express API exists only for calls that need private keys (OpenRouter, ElevenLabs). Keys stay on the server. The AI endpoints are rate-limited per IP and validate their input. Upstream errors are logged on the server and never forwarded to clients.
+- **Demo mode vs Firebase mode.** If no `VITE_FIREBASE_*` variables are set at build time, auth uses accounts kept in `localStorage`. The Firebase-only features then show a "setup required" screen instead of failing. Demo mode is for local evaluation only and gives **no real security**.
 
-## 📋 Work Breakdown
+### API
 
-### 🔬 Research Team Contributions
-- ✅ **User Research**: Conducted comprehensive surveys with 150+ students and 25+ faculty
-- ✅ **Competitive Analysis**: Analyzed existing solutions (LinkedIn Alumni, University ERPs)
-- ✅ **Workflow Mapping**: Documented ICAS-specific processes requiring automation
-- ✅ **Pain Point Validation**: Verified critical issues through stakeholder interviews
+| Method & path                  | Body                                                                    | Response                             |
+| ------------------------------ | ----------------------------------------------------------------------- | ------------------------------------ |
+| `GET /api/ping`                | —                                                                       | `{ message }`                        |
+| `POST /api/transfer/assistant` | JSON `{ question: string (≤2000 chars), context?: any }`                | `{ answer }`                         |
+| `POST /api/delegate/summary`   | Raw audio bytes (`Content-Type: audio/*`), optional `x-filename` header | `{ transcript, summary, modelUsed }` |
 
-### 💻 Development Team Contributions
-- ✅ **UI/UX Design**: Created intuitive, responsive interface using React + Vite
-- ✅ **Backend Architecture**: Implemented scalable Firebase infrastructure
-- ✅ **Feature Development**: Built Transfer Portal, Event Management, and Research Hub
-- ✅ **AI Integration**: Connected MCP servers with OpenRouter LLM for dynamic responses
-- ✅ **Testing & Deployment**: Comprehensive testing and production deployment
+Errors use the shape `{ error: string }` with status codes 400, 413, 415, 422, 429, 503 (service not configured) or 500.
 
----
-
-## 🚧 Challenges Overcome
-
-| **Challenge** | **Solution** | **Impact** |
-|---------------|--------------|-----------|
-| **🗄️ Data Integration** | Designed flexible schema for alumni/student data | Enabled dynamic search and real-time updates |
-| **⚡ Real-time Queries** | Implemented MCP servers for structured data retrieval | Accurate, non-hardcoded information delivery |
-| **👥 Dual User Experience** | Created role-based interfaces with shared components | Streamlined experience for both students and admins |
-| **📈 Scalability** | Built cloud-native architecture with Firebase | Supports multiple batches and concurrent users |
-
----
-
-## 🚀 Quick Start
+## Getting started
 
 ### Prerequisites
-- Node.js 18+
-- npm or pnpm
-- Firebase account
 
-### Installation
+- Node.js **22+**
+- pnpm **10** (`corepack enable` picks up the version pinned in `package.json`)
+
+### Install and run
 
 ```bash
-# Clone the repository
-git clone https://github.com/team-axion/icas-platform.git
-cd icas-platform
-
-# Install dependencies
+git clone https://github.com/jeevithg090/Axion-ICAS-Hacks.git
+cd Axion-ICAS-Hacks
 pnpm install
-
-# Set up environment variables
-cp .env.example .env.local
-# Add your Firebase configuration
-
-# Start development server
-pnpm dev
+cp .env.example .env   # optional: fill in the keys you have
+pnpm dev               # http://localhost:8080 (SPA + API on one port)
 ```
 
-### 🔧 Configuration
+With no configuration the app runs in **demo mode**. Sign in with one of these seeded browser-local accounts, or register a new student:
 
-1. **Firebase Setup**
+| Role      | Email              | Password  |
+| --------- | ------------------ | --------- |
+| Student   | `student@icas.edu` | `icas123` |
+| Professor | `prof@icas.edu`    | `icas123` |
+| Admin     | `admin@icas.edu`   | `icas123` |
+
+### Environment variables
+
+All variables are listed in [`.env.example`](.env.example).
+
+| Variable                     | Where              | Purpose                                                           |
+| ---------------------------- | ------------------ | ----------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`         | Server             | Enables the Transfer Assistant and meeting summaries              |
+| `ELEVENLABS_API_KEY`         | Server             | Enables meeting transcription                                     |
+| `OPENROUTER_ASSISTANT_MODEL` | Server             | Assistant model (default `openrouter/auto`)                       |
+| `OPENROUTER_SUMMARY_MODELS`  | Server             | Comma-separated fallback model list for summaries                 |
+| `APP_URL`                    | Server             | Public URL, sent to OpenRouter as `HTTP-Referer`                  |
+| `CORS_ORIGINS`               | Server             | Extra origins allowed to call the API (default: same-origin only) |
+| `AI_RATE_LIMIT_PER_MINUTE`   | Server             | Per-IP limit for AI endpoints (default 10)                        |
+| `MAX_AUDIO_UPLOAD`           | Server             | Max recording size (default `25mb`)                               |
+| `TRUST_PROXY`                | Server             | Reverse-proxy hops to trust for client IPs (default 1)            |
+| `PORT`                       | Server             | Port for `pnpm start` (default 3000)                              |
+| `VITE_FIREBASE_*`            | Client, build time | Firebase web app config. Leave empty for demo mode.               |
+
+Server variables are secrets: keep them out of git and out of any `VITE_` variable. The `VITE_FIREBASE_*` values end up in the browser bundle by design. Firebase web config is not a secret, so protect your data with the security rules and, ideally, App Check.
+
+### Setting up Firebase (optional)
+
+1. Create a Firebase project and add a **Web app**. Copy its config into the `VITE_FIREBASE_*` variables.
+2. Enable **Authentication → Email/Password**, **Cloud Firestore** and **Storage**.
+3. Deploy the security rules:
    ```bash
-   # Initialize Firebase
-   firebase init
-   # Select Firestore, Authentication, and Hosting
+   npx firebase-tools login
+   npx firebase-tools deploy --only firestore:rules,storage --project <your-project-id>
    ```
+4. Rebuild or restart the dev server. New sign-ups are always students. To make an admin, set `role: "admin"` on their `users/{uid}` document in the Firebase console.
 
-2. **Environment Variables**
-   ```env
-   VITE_FIREBASE_API_KEY=your_api_key
-   VITE_FIREBASE_AUTH_DOMAIN=your_domain
-   VITE_FIREBASE_PROJECT_ID=your_project_id
-   ```
+## Scripts
 
----
+| Command                             | Description                                                  |
+| ----------------------------------- | ------------------------------------------------------------ |
+| `pnpm dev`                          | Dev server with hot reload (client + API) on port 8080       |
+| `pnpm build`                        | Production build: SPA → `dist/spa`, server → `dist/server`   |
+| `pnpm start`                        | Run the production server (`dist/server/node-build.mjs`)     |
+| `pnpm test`                         | Run the Vitest suite once (`pnpm test:watch` for watch mode) |
+| `pnpm lint` / `pnpm lint:fix`       | ESLint                                                       |
+| `pnpm format` / `pnpm format:check` | Prettier                                                     |
+| `pnpm typecheck`                    | TypeScript (`tsc --noEmit`)                                  |
+| `pnpm check`                        | Typecheck, lint, format check and tests in one go            |
 
+## Testing
 
+The tests cover the core logic and the API:
 
-</div>
+- `client/lib/*.spec.ts`: GPA and projected-GPA maths, course recommendations, transfer-credit validation, transfer progress, eligibility, next-step and file-name rules, demo-account handling, open-redirect protection
+- `server/**/*.spec.ts`: request validation, error mapping, rate limiting, the transcription → summarization pipeline with model fallback, and LLM JSON parsing. External APIs are mocked, so tests need no keys or network.
+
+## Deployment
+
+### Node server (any VPS / PaaS)
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+NODE_ENV=production pnpm start
+```
+
+The server serves the SPA from `dist/spa`, handles `/api/*`, and falls back to `index.html` for client-side routes. Set the server environment variables on the host. Set `VITE_FIREBASE_*` **before** `pnpm build`.
+
+### Netlify
+
+[`netlify.toml`](netlify.toml) builds the SPA, deploys the Express app as the `api` function (`netlify/functions/api.ts`) and sets up the `/api/*` and SPA fallback redirects. Add the environment variables in the Netlify UI. Netlify Functions limit request bodies to about 6 MB, so long meeting recordings need the Node server deployment instead.
+
+## Project structure
+
+```
+client/                     React SPA
+├── App.tsx                 Routes (lazy-loaded) and providers
+├── components/
+│   ├── auth/               Protected, RequireRole, RequireFirebase guards
+│   ├── layout/             Header (with mobile drawer), Footer, SiteLayout
+│   ├── sections/           Home/portal sections (incl. DelegateSessionsSummary)
+│   └── ui/                 shadcn/ui primitives
+├── context/AuthContext.tsx Unified auth: Firebase or local demo mode
+├── data/sample.ts          Sample content and demo accounts
+├── lib/                    Domain logic (transfer, planner, buddy, research, study centre, auth helpers)
+└── pages/                  Route components
+server/
+├── index.ts                Express app (middleware, routes, error handling)
+├── node-build.ts           Production entry: static SPA + API
+├── lib/                    OpenRouter client, audio helpers, error types
+└── routes/                 /api/transfer/assistant, /api/delegate/summary
+shared/api.ts               Request/response types shared by client and server
+netlify/functions/api.ts    Netlify Function wrapper around the Express app
+firestore.rules             Firestore security rules
+storage.rules               Storage security rules
+```
+
+## Known limitations
+
+- The admin dashboard and the portal dashboard use static sample data.
+- Demo mode stores accounts and passwords in the browser's `localStorage`. It is for demos only.
+- The Firestore/Storage rules have not been run against the Firebase emulator. Review them for your data model before production use.
