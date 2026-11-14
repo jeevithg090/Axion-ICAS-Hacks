@@ -1,5 +1,13 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+  ArrowRight,
+  Bot,
+  Cpu,
+  Newspaper,
+  Plane,
+  type LucideIcon,
+} from "lucide-react";
 import SEO from "@/components/SEO";
 import ProgramCarousel from "@/components/sections/ProgramCarousel";
 import Partners from "@/components/sections/Partners";
@@ -22,11 +30,37 @@ const events = [
 const news = [
   {
     title: "ICAS researchers publish breakthrough on wearable diagnostics",
-    clip: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
+    tag: "Research",
   },
   {
     title: "Alumni story: From ICAS to leading vaccine delivery tech",
-    clip: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
+    tag: "Alumni",
+  },
+];
+
+const categories: {
+  title: string;
+  blurb: string;
+  icon: LucideIcon;
+  tone: string;
+}[] = [
+  {
+    title: "Computer Science & Engineering",
+    blurb: "AI/ML, systems and product engineering.",
+    icon: Cpu,
+    tone: "bg-primary/10 text-primary",
+  },
+  {
+    title: "Aeronautical Engineering",
+    blurb: "Aerodynamics, propulsion and avionics.",
+    icon: Plane,
+    tone: "bg-secondary/10 text-secondary dark:text-blue-300",
+  },
+  {
+    title: "Mechatronics",
+    blurb: "Robotics, embedded systems and control.",
+    icon: Bot,
+    tone: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   },
 ];
 
@@ -42,96 +76,79 @@ export default function Index() {
         description="A modern, accessible, and inspiring institute advancing research, medicine, and education worldwide."
       />
 
-      {/* Hero with campus background */}
-      <section className="relative overflow-hidden">
-        <img
-          src="https://images.pexels.com/photos/7972558/pexels-photo-7972558.jpeg?auto=compress&cs=tinysrgb&w=1600"
-          alt="University campus with students"
-          className="absolute inset-0 h-full w-full object-cover"
-          decoding="async"
-          fetchPriority="high"
+      {/* Hero */}
+      <section className="relative isolate overflow-hidden bg-slate-950 text-white">
+        <div
+          aria-hidden
+          className="absolute inset-0 -z-10 bg-[radial-gradient(60%_70%_at_85%_0%,hsl(20_88%_45%/0.45),transparent_60%),radial-gradient(55%_65%_at_0%_100%,hsl(221_70%_46%/0.5),transparent_60%)]"
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/40 to-black/25"
+          className="absolute inset-0 -z-10 opacity-60 [background-image:radial-gradient(rgb(255_255_255/0.09)_1px,transparent_1px)] [background-size:22px_22px]"
         />
-        <div className="relative">
-          <div className="container py-20 md:py-28">
-            <div className="max-w-3xl text-white">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/25">
-                International Center for Applied Science
+        <div className="container pb-28 pt-32 md:pb-36 md:pt-40">
+          <div className="max-w-3xl animate-fade-up">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold ring-1 ring-white/20">
+              <span
+                aria-hidden
+                className="h-1.5 w-1.5 rounded-full bg-orange-400"
+              />
+              International Center for Applied Science
+            </span>
+            <h1 className="mt-6 text-4xl font-extrabold leading-[1.05] sm:text-5xl md:text-6xl">
+              Advancing knowledge.{" "}
+              <span className="bg-gradient-to-r from-orange-300 to-amber-200 bg-clip-text text-transparent">
+                Improving lives.
               </span>
-              <h1 className="mt-6 text-4xl font-extrabold tracking-tight md:text-6xl">
-                Advancing knowledge. Improving lives.
-              </h1>
-              <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/90 md:text-lg">
-                ICAS, a MAHE constituent, offers a 2+2 engineering pathway — 2
-                years in Manipal and 2 years abroad — across Computer Science,
-                Aeronautical, and Mechatronics.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Link
-                  to="/academics"
-                  className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                >
-                  Explore Academics
-                </Link>
-                <Link
-                  to="/research"
-                  className="inline-flex items-center rounded-md bg-secondary px-4 py-2 text-secondary-foreground transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                >
-                  Research & Medicine
-                </Link>
-              </div>
+            </h1>
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-300 md:text-lg">
+              ICAS, a MAHE constituent, offers a 2+2 engineering pathway — 2
+              years in Manipal and 2 years abroad — across Computer Science,
+              Aeronautical, and Mechatronics.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                to="/academics"
+                className="inline-flex h-11 items-center gap-2 rounded-md bg-primary px-5 font-semibold text-primary-foreground shadow-lg shadow-orange-900/30 hover:-translate-y-0.5 hover:bg-primary/90"
+              >
+                Explore Academics
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+              <Link
+                to="/transfer"
+                className="inline-flex h-11 items-center rounded-md border border-white/25 bg-white/10 px-5 font-semibold text-white hover:bg-white/20"
+              >
+                How the 2+2 transfer works
+              </Link>
             </div>
           </div>
-          {/* Wave separator */}
-          <svg
-            aria-hidden
-            className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 w-full text-background"
-            viewBox="0 0 1440 120"
-            preserveAspectRatio="none"
-          >
-            <path
-              fill="currentColor"
-              d="M0,64L48,58.7C96,53,192,43,288,53.3C384,64,480,96,576,122.7C672,149,768,171,864,154.7C960,139,1056,85,1152,74.7C1248,64,1344,96,1392,112L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
-            />
-          </svg>
         </div>
       </section>
 
-      {/* Categories */}
-      <section className="container -mt-6 grid gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          {
-            title: "Computer Science & Engineering",
-            img: "https://images.pexels.com/photos/1181673/pexels-photo-1181673.jpeg?auto=compress&cs=tinysrgb&w=800",
-          },
-          {
-            title: "Aeronautical Engineering",
-            img: "https://images.pexels.com/photos/256219/pexels-photo-256219.jpeg?auto=compress&cs=tinysrgb&w=800",
-          },
-          {
-            title: "Mechatronics",
-            img: "https://images.pexels.com/photos/2599244/pexels-photo-2599244.jpeg?auto=compress&cs=tinysrgb&w=800",
-          },
-        ].map((c) => (
+      {/* Programme categories */}
+      <section
+        aria-label="Engineering programmes"
+        className="container relative z-10 -mt-16 grid gap-4 pb-6 sm:grid-cols-2 lg:grid-cols-3"
+      >
+        {categories.map((c) => (
           <Link
             key={c.title}
             to="/academics"
-            className="group relative overflow-hidden rounded-xl ring-1 ring-border"
+            className="group surface flex items-start gap-4 p-5 shadow-lift hover:-translate-y-1 hover:border-primary/40"
           >
-            <img
-              src={c.img}
-              alt={c.title}
-              className="h-40 w-full object-cover transition duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-black/30" />
-            <div className="absolute inset-x-0 bottom-0 p-4">
-              <div className="inline-flex rounded-md bg-white/90 px-2 py-1 text-xs font-semibold text-slate-900 backdrop-blur">
+            <span
+              className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl ${c.tone}`}
+            >
+              <c.icon className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <span className="min-w-0">
+              <span className="block font-semibold group-hover:text-primary">
                 {c.title}
-              </div>
-            </div>
+              </span>
+              <span className="mt-1 block text-sm text-muted-foreground">
+                {c.blurb}
+              </span>
+            </span>
           </Link>
         ))}
       </section>
@@ -151,11 +168,11 @@ export default function Index() {
               the clinic. Explore our timeline, faculty, and global
               partnerships.
             </p>
-            <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-4 xl:grid-cols-4">
               {stats.map((s) => (
                 <div
                   key={s.label}
-                  className="rounded-lg bg-card p-4 text-center shadow-sm ring-1 ring-border"
+                  className="rounded-lg bg-card p-4 text-center shadow-sm border"
                 >
                   <div className="text-2xl font-bold text-primary">
                     {s.value}
@@ -177,32 +194,32 @@ export default function Index() {
           </div>
 
           {/* Research metrics */}
-          <div className="rounded-xl bg-gradient-to-br from-brand-600/10 to-secondary/10 p-6 ring-1 ring-border">
+          <div className="rounded-xl bg-gradient-to-br from-brand-600/10 to-secondary/10 p-6 border">
             <h3 className="text-lg font-semibold">
               Research & Medicine metrics
             </h3>
-            <dl className="mt-4 grid grid-cols-2 gap-4 text-sm md:grid-cols-3">
-              <div className="rounded-lg bg-card p-4 ring-1 ring-border">
+            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm xl:grid-cols-3">
+              <div className="rounded-lg bg-card p-4 border">
                 <dt className="text-muted-foreground">Clinical trials</dt>
                 <dd className="mt-1 text-xl font-bold">36 active</dd>
               </div>
-              <div className="rounded-lg bg-card p-4 ring-1 ring-border">
+              <div className="rounded-lg bg-card p-4 border">
                 <dt className="text-muted-foreground">Translational grants</dt>
                 <dd className="mt-1 text-xl font-bold">$58M</dd>
               </div>
-              <div className="rounded-lg bg-card p-4 ring-1 ring-border">
+              <div className="rounded-lg bg-card p-4 border">
                 <dt className="text-muted-foreground">Open datasets</dt>
                 <dd className="mt-1 text-xl font-bold">48</dd>
               </div>
-              <div className="rounded-lg bg-card p-4 ring-1 ring-border">
+              <div className="rounded-lg bg-card p-4 border">
                 <dt className="text-muted-foreground">Patents filed</dt>
                 <dd className="mt-1 text-xl font-bold">92</dd>
               </div>
-              <div className="rounded-lg bg-card p-4 ring-1 ring-border">
+              <div className="rounded-lg bg-card p-4 border">
                 <dt className="text-muted-foreground">Case studies</dt>
                 <dd className="mt-1 text-xl font-bold">120+</dd>
               </div>
-              <div className="rounded-lg bg-card p-4 ring-1 ring-border">
+              <div className="rounded-lg bg-card p-4 border">
                 <dt className="text-muted-foreground">Global partners</dt>
                 <dd className="mt-1 text-xl font-bold">150</dd>
               </div>
@@ -241,10 +258,7 @@ export default function Index() {
             { name: "Robotics", blurb: "Mechanisms, electronics, control." },
             { name: "Research", blurb: "Papers, reviews, reproducibility." },
           ].map((d) => (
-            <li
-              key={d.name}
-              className="rounded-lg bg-card p-4 ring-1 ring-border"
-            >
+            <li key={d.name} className="rounded-lg bg-card p-4 border">
               <div className="text-lg font-semibold">{d.name}</div>
               <p className="mt-1 text-sm text-muted-foreground">{d.blurb}</p>
             </li>
@@ -265,10 +279,7 @@ export default function Index() {
         </div>
         <ul className="grid gap-4 md:grid-cols-3">
           {[1, 2, 3].map((i) => (
-            <li
-              key={i}
-              className="rounded-lg bg-card p-4 shadow-sm ring-1 ring-border"
-            >
+            <li key={i} className="rounded-lg bg-card p-4 shadow-sm border">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 shrink-0 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20" />
                 <div>
@@ -288,7 +299,7 @@ export default function Index() {
         </ul>
       </section>
 
-      {/* News & Featured Records with clips */}
+      {/* News & Featured Records */}
       <section className="border-y bg-muted/20">
         <div className="container py-14">
           <div className="mb-6 flex items-center justify-between">
@@ -306,19 +317,29 @@ export default function Index() {
             {news.map((n) => (
               <article
                 key={n.title}
-                className="group overflow-hidden rounded-xl bg-card ring-1 ring-border"
+                className="group relative overflow-hidden rounded-xl border bg-card shadow-sm hover:-translate-y-0.5 hover:shadow-lift"
               >
-                <div className="aspect-video bg-muted/50">
-                  <video
-                    controls
-                    preload="metadata"
-                    className="h-full w-full object-cover"
-                    src={n.clip + "#t=0.1"}
+                <div className="relative grid aspect-[16/7] place-items-center overflow-hidden bg-gradient-to-br from-primary/15 via-background to-secondary/15">
+                  <div
+                    aria-hidden
+                    className="bg-grid absolute inset-0 opacity-60"
+                  />
+                  <Newspaper
+                    className="relative h-10 w-10 text-primary/70"
+                    aria-hidden="true"
                   />
                 </div>
                 <div className="p-5">
-                  <h3 className="text-lg font-semibold group-hover:underline">
-                    {n.title}
+                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    {n.tag}
+                  </span>
+                  <h3 className="mt-1 text-lg font-semibold">
+                    <Link
+                      to="/news"
+                      className="after:absolute after:inset-0 group-hover:text-primary"
+                    >
+                      {n.title}
+                    </Link>
                   </h3>
                 </div>
               </article>
@@ -340,16 +361,13 @@ export default function Index() {
         </div>
         <ol className="grid gap-4 md:grid-cols-3">
           {events.map((e) => (
-            <li
-              key={e.title}
-              className="rounded-lg bg-card p-4 ring-1 ring-border"
-            >
+            <li key={e.title} className="rounded-lg bg-card p-4 border">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-primary">
                   {e.date}
                 </span>
                 <span
-                  className={`text-xs ${e.status === "current" ? "text-green-600" : "text-muted-foreground"}`}
+                  className={`text-xs ${e.status === "current" ? "font-medium text-emerald-700 dark:text-emerald-400" : "text-muted-foreground"}`}
                 >
                   {e.status === "current" ? "Happening now" : "Upcoming"}
                 </span>
@@ -367,24 +385,24 @@ export default function Index() {
           className="pointer-events-none absolute -inset-x-10 -top-10 h-40 bg-[radial-gradient(50%_50%_at_50%_0%,hsl(var(--primary)/0.12),transparent)]"
         />
         <div className="container">
-          <div className="flex flex-col items-start gap-6 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 p-8 ring-1 ring-border md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col items-start gap-6 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 p-8 border md:flex-row md:items-center md:justify-between">
             <div>
-              <h3 className="text-2xl font-bold tracking-tight">Join ICAS</h3>
+              <h2 className="text-2xl font-bold tracking-tight">Join ICAS</h2>
               <p className="mt-1 text-muted-foreground">
                 Learn how to apply, connect with faculty, and access financial &
                 medical aid.
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Link
                 to="/contact"
-                className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-primary-foreground shadow-soft transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex h-11 items-center rounded-md bg-primary px-5 font-semibold text-primary-foreground shadow-sm hover:-translate-y-0.5 hover:bg-primary/90"
               >
                 Contact Admissions
               </Link>
               <Link
                 to="/financial-aid"
-                className="inline-flex items-center rounded-md bg-secondary px-4 py-2 text-secondary-foreground transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex h-11 items-center rounded-md border bg-background px-5 font-semibold hover:-translate-y-0.5 hover:bg-muted"
               >
                 Financial & Medical Aid
               </Link>

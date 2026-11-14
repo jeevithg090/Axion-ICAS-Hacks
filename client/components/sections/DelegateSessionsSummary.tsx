@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { FileAudio, Loader2, Sparkles, UploadCloud } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import type { DelegateSummaryResponse, MeetingSummary } from "@shared/api";
@@ -107,6 +107,11 @@ function SummaryView({ data }: { data: DelegateSummaryResponse }) {
   );
 }
 
+function formatBytes(n: number) {
+  if (n < 1024 * 1024) return `${Math.max(1, Math.round(n / 1024))} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export default function DelegateSessionsSummary() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -155,26 +160,70 @@ export default function DelegateSessionsSummary() {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">Delegate Sessions Summary</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Upload a meeting recording to get a transcript plus decisions, action
+          items and next steps.
+        </p>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <div className="grid gap-2">
-          <Input
-            type="file"
-            accept="audio/*"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-          />
-          <div className="text-xs text-muted-foreground">
-            Upload a meeting recording (mp3, wav, m4a...). We'll transcribe and
-            summarize it for you.
-          </div>
-          <div className="flex gap-2">
+        <div className="grid gap-3">
+          <label
+            htmlFor="delegate-audio"
+            className="group flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed px-4 py-6 text-center hover:border-primary/50 hover:bg-muted/40 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
+          >
+            {file ? (
+              <FileAudio className="h-8 w-8 text-primary" aria-hidden="true" />
+            ) : (
+              <UploadCloud
+                className="h-8 w-8 text-muted-foreground group-hover:text-primary"
+                aria-hidden="true"
+              />
+            )}
+            <span className="text-sm font-medium">
+              {file ? file.name : "Choose an audio file"}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {file
+                ? `${formatBytes(file.size)} · click to choose a different file`
+                : "MP3, WAV, M4A and other audio formats"}
+            </span>
+            <input
+              id="delegate-audio"
+              type="file"
+              accept="audio/*"
+              className="sr-only"
+              onChange={(e) => {
+                setFile(e.target.files?.[0] || null);
+                setError(null);
+                setResult(null);
+              }}
+            />
+          </label>
+          <div className="flex flex-wrap items-center gap-2">
             <Button onClick={onSubmit} disabled={!file || loading}>
-              {loading ? "Processing..." : "Generate Summary"}
+              {loading ? (
+                <Loader2 className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Sparkles aria-hidden="true" />
+              )}
+              {loading ? "Transcribing and summarising…" : "Generate summary"}
             </Button>
             {result?.modelUsed && (
               <Badge variant="outline">Model: {result.modelUsed}</Badge>
             )}
           </div>
+          <p className="sr-only" role="status" aria-live="polite">
+            {loading
+              ? "Processing your recording. This can take a minute."
+              : result
+                ? "Summary ready."
+                : ""}
+          </p>
+          {loading && (
+            <p className="text-xs text-muted-foreground">
+              Long recordings can take a minute or two.
+            </p>
+          )}
         </div>
 
         {error && (
