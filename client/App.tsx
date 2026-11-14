@@ -60,10 +60,10 @@ function cloudFeature(feature: string, page: ReactElement) {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
       <BrowserRouter>
         <ThemeProvider>
+          <Toaster />
+          <Sonner />
           <AuthProvider>
             <SiteLayout>
               <ErrorBoundary>

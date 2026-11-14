@@ -92,6 +92,7 @@ export default {
       },
       boxShadow: {
         soft: "0 10px 30px -10px rgba(0,0,0,0.15)",
+        lift: "0 1px 2px rgba(15,23,42,0.06), 0 12px 32px -12px rgba(15,23,42,0.18)",
         ring: "0 0 0 4px hsl(var(--ring)/0.25)",
       },
       borderRadius: {
@@ -112,11 +113,16 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-4px)" },
         },
+        "fade-up": {
+          from: { opacity: "0", transform: "translateY(6px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         float: "float 6s ease-in-out infinite",
+        "fade-up": "fade-up 0.35s cubic-bezier(0.4, 0, 0.2, 1) both",
       },
     },
   },
