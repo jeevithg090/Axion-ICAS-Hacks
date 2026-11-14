@@ -195,10 +195,8 @@ export default function AcademicPlanner() {
       <section className="container py-10">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              ICAS Navigator
-            </h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="page-title">Academic Planner</h1>
+            <p className="page-lead">
               Academic planning and course selection assistant
             </p>
           </div>
@@ -210,7 +208,7 @@ export default function AcademicPlanner() {
         </div>
 
         {plan && (
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <Tabs defaultValue="planner" className="w-full">
                 <TabsList>

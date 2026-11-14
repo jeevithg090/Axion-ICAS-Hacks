@@ -1,5 +1,8 @@
 import type { ApiError, TransferAssistantResponse } from "@shared/api";
+import { Printer } from "lucide-react";
+import { toast } from "sonner";
 import SEO from "@/components/SEO";
+import PageHeader from "@/components/PageHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,24 +67,20 @@ export default function PortalTransfer() {
         description="Manage your 2+2 transfer journey end-to-end."
       />
       <section className="container py-10">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Smart Transfer Portal
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              ICAS 2+2 Program Hub
-            </p>
-          </div>
-          <div className="flex gap-2">
+        <PageHeader
+          eyebrow="ICAS 2+2 Program Hub"
+          title="Smart Transfer Portal"
+          description="Upload documents, check eligibility and keep track of every transfer deadline."
+          actions={
             <Button onClick={() => window.print()} variant="outline">
+              <Printer aria-hidden="true" />
               Download Certificate (PDF)
             </Button>
-          </div>
-        </div>
+          }
+        />
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 grid gap-6">
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="grid min-w-0 grid-cols-1 gap-6 lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Progress</CardTitle>
@@ -153,7 +152,7 @@ export default function PortalTransfer() {
             </Tabs>
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid content-start gap-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Upcoming Deadlines</CardTitle>
@@ -182,7 +181,7 @@ export default function PortalTransfer() {
                 <CardTitle className="text-lg">Calendar</CardTitle>
               </CardHeader>
               <CardContent>
-                <Calendar mode="single" className="rounded-md border" />
+                <Calendar mode="single" className="mx-auto rounded-md border" />
               </CardContent>
             </Card>
           </div>
@@ -208,6 +207,15 @@ export default function PortalTransfer() {
   );
 }
 
+const docStatusStyle: Record<DocumentItem["status"], string> = {
+  verified:
+    "border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300",
+  uploaded:
+    "border-blue-600/30 bg-blue-500/10 text-blue-800 dark:text-blue-300",
+  pending:
+    "border-amber-600/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
+};
+
 function DocumentsTab({
   profileKey,
   onChange,
@@ -229,7 +237,7 @@ function DocumentsTab({
   const handleUpload = (item: DocumentItem, file: File) => {
     const error = validateFileNaming(file.name, item);
     if (error) {
-      alert(error);
+      toast.error("Check the file name", { description: error });
       return;
     }
     const patch: Partial<DocumentItem> = {
@@ -249,25 +257,20 @@ function DocumentsTab({
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6">
       {(["academic", "personal", "financial"] as const).map((cat) => (
         <Card key={cat}>
           <CardHeader>
             <CardTitle className="text-lg capitalize">{cat}</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3">
+          <CardContent className="grid gap-3 sm:grid-cols-2">
             {groups[cat].map((item) => (
               <div key={item.id} className="rounded-md border p-3 text-sm">
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between gap-3">
                   <div className="font-medium">{item.label}</div>
                   <Badge
-                    variant={
-                      item.status === "verified"
-                        ? "secondary"
-                        : item.status === "uploaded"
-                          ? "outline"
-                          : "destructive"
-                    }
+                    variant="outline"
+                    className={`shrink-0 capitalize ${docStatusStyle[item.status]}`}
                   >
                     {item.status}
                   </Badge>
@@ -281,6 +284,7 @@ function DocumentsTab({
                     aria-label={`Upload ${item.label}`}
                     type="file"
                     accept="application/pdf"
+                    className="block w-full text-xs text-muted-foreground file:mr-3 file:h-9 file:cursor-pointer file:rounded-md file:border file:border-input file:bg-background file:px-3 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
                     onChange={(e) => {
                       const f = e.target.files?.[0];
                       if (f) handleUpload(item, f);
@@ -360,11 +364,11 @@ function UniversitiesTab({
                   size="sm"
                   variant="ghost"
                   onClick={() =>
-                    alert(
-                      res.eligible
-                        ? `Strong fit for ${u.name}.`
-                        : `You may need to improve GPA or credits.`,
-                    )
+                    res.eligible
+                      ? toast.success(`Strong fit for ${u.name}.`)
+                      : toast.warning(
+                          `You may need to improve your GPA or credits for ${u.name}.`,
+                        )
                   }
                 >
                   Check Eligibility
@@ -405,7 +409,7 @@ function DeadlinesTab({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => alert(`Reminder set for ${d.label}.`)}
+              onClick={() => toast.success(`Reminder set for ${d.label}.`)}
             >
               Remind me
             </Button>

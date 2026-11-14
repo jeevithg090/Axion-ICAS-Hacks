@@ -26,15 +26,24 @@ export default class ErrorBoundary extends Component<
         <div className="mx-auto max-w-lg rounded-xl border bg-card p-8 text-center shadow-sm">
           <h1 className="text-xl font-semibold">Something went wrong</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            The page failed to load. Please try again.
+            The page failed to load. This is often a dropped connection or a new
+            version of the site. Reloading usually fixes it.
           </p>
-          <button
-            type="button"
-            onClick={() => window.location.reload()}
-            className="mt-6 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Reload page
-          </button>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="inline-flex h-10 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              Reload page
+            </button>
+            <a
+              href="/"
+              className="inline-flex h-10 items-center rounded-md border px-4 text-sm font-semibold hover:bg-muted"
+            >
+              Go to home page
+            </a>
+          </div>
         </div>
       </main>
     );

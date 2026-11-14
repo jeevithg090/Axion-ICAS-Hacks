@@ -23,17 +23,14 @@ export default function StudentLife() {
       />
       <section className="container py-12">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold tracking-tight">Student Life</h1>
+          <h1 className="page-title">Student Life</h1>
           <span className="rounded-md border px-2 py-1 text-xs">
             Private feed (sample)
           </span>
         </div>
         <ul className="mt-6 grid gap-4 md:grid-cols-2">
           {feed.map((p) => (
-            <li
-              key={p.id}
-              className="rounded-lg bg-card p-4 ring-1 ring-border"
-            >
+            <li key={p.id} className="rounded-lg bg-card p-4 border shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30" />
                 <div>

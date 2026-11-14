@@ -248,10 +248,8 @@ export default function PortalTransferCloud() {
       <section className="container py-10">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              Smart Transfer Portal
-            </h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="page-title">Smart Transfer Portal</h1>
+            <p className="page-lead">
               Track your 2+2 transfer journey in real-time
             </p>
           </div>
@@ -263,7 +261,7 @@ export default function PortalTransferCloud() {
         </div>
 
         {profile && (
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-6">
               {/* Progress Overview */}
               <Card>
@@ -303,7 +301,7 @@ export default function PortalTransferCloud() {
               </Card>
 
               <Tabs defaultValue="documents" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid h-auto w-full grid-cols-2 sm:grid-cols-4">
                   <TabsTrigger value="documents">Documents</TabsTrigger>
                   <TabsTrigger value="universities">Universities</TabsTrigger>
                   <TabsTrigger value="deadlines">Deadlines</TabsTrigger>

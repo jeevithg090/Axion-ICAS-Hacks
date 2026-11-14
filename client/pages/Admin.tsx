@@ -1,5 +1,24 @@
+import { Megaphone, Users, BookOpen, type LucideIcon } from "lucide-react";
 import SEO from "@/components/SEO";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import PageHeader from "@/components/PageHeader";
+
+const areas: { title: string; body: string; icon: LucideIcon }[] = [
+  {
+    title: "University Announcements",
+    body: "Post campus-wide updates and alerts.",
+    icon: Megaphone,
+  },
+  {
+    title: "Courses & Faculty",
+    body: "Create and update course listings, assign faculty.",
+    icon: BookOpen,
+  },
+  {
+    title: "Student Records",
+    body: "View student profiles and academic progress.",
+    icon: Users,
+  },
+];
 
 export default function Admin() {
   return (
@@ -9,41 +28,28 @@ export default function Admin() {
         description="University administrator console"
       />
       <section className="container py-10">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Administrator Dashboard
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage announcements, courses, and student data.
-        </p>
+        <PageHeader
+          eyebrow="Administrator"
+          title="Administrator Dashboard"
+          description="Manage announcements, courses, and student data."
+        />
 
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">
-                University Announcements
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Post campus-wide updates and alerts.
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Courses & Faculty</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Create and update course listings, assign faculty.
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Student Records</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              View student profiles and academic progress.
-            </CardContent>
-          </Card>
-        </div>
+        <ul className="mt-8 grid gap-6 md:grid-cols-3">
+          {areas.map((a) => (
+            <li key={a.title} className="surface p-6">
+              <div className="flex items-start justify-between gap-3">
+                <span className="grid h-10 w-10 place-items-center rounded-lg bg-primary/10 text-primary">
+                  <a.icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <span className="rounded-full border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                  Coming soon
+                </span>
+              </div>
+              <h2 className="mt-4 text-lg font-semibold">{a.title}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{a.body}</p>
+            </li>
+          ))}
+        </ul>
       </section>
     </main>
   );

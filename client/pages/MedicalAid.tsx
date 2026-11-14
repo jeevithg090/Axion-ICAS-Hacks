@@ -9,12 +9,15 @@ export default function MedicalAid() {
         description="On‑campus health services and insurance."
       />
       <section className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">Medical Aid</h1>
-        <ul className="mt-6 grid gap-4 md:grid-cols-3">
+        <h1 className="page-title">Medical Aid</h1>
+        <p className="page-lead">
+          Health services and medical support available on campus.
+        </p>
+        <ul className="mt-10 grid gap-4 md:grid-cols-3">
           {medicalAid.map((m) => (
             <li
               key={m.service}
-              className="rounded-xl bg-card p-6 ring-1 ring-border"
+              className="rounded-xl bg-card p-6 border shadow-sm"
             >
               <div className="font-semibold">{m.service}</div>
               <div className="text-sm text-muted-foreground">{m.hours}</div>

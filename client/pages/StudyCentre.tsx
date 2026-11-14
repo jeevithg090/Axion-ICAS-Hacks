@@ -381,8 +381,8 @@ export default function StudyCentre() {
       <section className="container py-10">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Study Centre</h1>
-            <p className="text-sm text-muted-foreground">
+            <h1 className="page-title">Study Centre</h1>
+            <p className="page-lead">
               Keep notes, syllabus and resources organized per course.
             </p>
           </div>

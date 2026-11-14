@@ -28,10 +28,8 @@ export default function About() {
         description="Explore the ICAS story and our measurable research impact."
       />
       <section className="container py-14">
-        <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-          About ICAS
-        </h1>
-        <p className="mt-3 max-w-2xl text-muted-foreground">
+        <h1 className="page-title">About ICAS</h1>
+        <p className="page-lead">
           A community where discovery meets impact. Our timeline highlights
           milestones in research, education, and global outreach.
         </p>
@@ -59,7 +57,7 @@ export default function About() {
           ].map((s) => (
             <div
               key={s.label}
-              className="rounded-xl bg-card p-6 text-center shadow-sm ring-1 ring-border"
+              className="rounded-xl bg-card p-6 text-center shadow-sm border shadow-sm"
             >
               <div className="text-3xl font-extrabold text-primary">
                 {s.value}

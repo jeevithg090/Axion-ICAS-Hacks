@@ -12,17 +12,13 @@ export default function Enigma() {
         description="Enigma club: Development, Robotics, and Research domains at ICAS."
       />
       <section className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">
-          {enigma.name} Club
-        </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          {enigma.description}
-        </p>
+        <h1 className="page-title">{enigma.name} Club</h1>
+        <p className="page-lead">{enigma.description}</p>
         <div className="mt-6 grid gap-6 md:grid-cols-3">
           {enigma.domains.map((d) => (
             <article
               key={d.name}
-              className="overflow-hidden rounded-xl bg-card ring-1 ring-border"
+              className="overflow-hidden rounded-xl bg-card border shadow-sm"
             >
               {"image" in d && (
                 <img
@@ -48,7 +44,7 @@ export default function Enigma() {
             {upcoming.map((e) => (
               <li
                 key={e.title}
-                className="rounded-lg bg-card p-4 ring-1 ring-border"
+                className="rounded-lg bg-card p-4 border shadow-sm"
               >
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-semibold text-primary">

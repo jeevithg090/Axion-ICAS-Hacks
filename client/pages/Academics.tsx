@@ -10,8 +10,8 @@ export default function Academics() {
       />
 
       <section className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">Academics</h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
+        <h1 className="page-title">Academics</h1>
+        <p className="page-lead">
           ICAS is a MAHE constituent offering Computer Science, Aeronautical
           Engineering, and Mechatronics in a 2+2 format: 2 years in Manipal, 2
           years abroad.
@@ -20,7 +20,7 @@ export default function Academics() {
           {programs.map((p) => (
             <article
               key={p.id}
-              className="rounded-xl bg-card p-6 ring-1 ring-border shadow-sm"
+              className="rounded-xl bg-card p-6 border shadow-sm shadow-sm"
             >
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {p.level}
@@ -56,7 +56,7 @@ export default function Academics() {
               {twoPlusTwoPartners.map((p) => (
                 <li
                   key={p.name}
-                  className="rounded-md bg-card p-3 text-sm ring-1 ring-border"
+                  className="rounded-md bg-card p-3 text-sm border shadow-sm"
                 >
                   <div className="font-medium">{p.name}</div>
                   <div className="text-xs text-muted-foreground">
@@ -75,7 +75,7 @@ export default function Academics() {
           {courses.map((c) => (
             <li
               key={c.code}
-              className="rounded-lg bg-card p-4 ring-1 ring-border"
+              className="rounded-lg bg-card p-4 border shadow-sm"
             >
               <div className="text-sm font-medium">{c.title}</div>
               <div className="text-xs text-muted-foreground">

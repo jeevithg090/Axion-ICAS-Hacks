@@ -9,12 +9,15 @@ export default function Faculty() {
         description="Meet our faculty and their qualifications."
       />
       <section className="container py-12">
-        <h1 className="text-3xl font-bold tracking-tight">Faculty Directory</h1>
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
+        <h1 className="page-title">Faculty Directory</h1>
+        <p className="page-lead">
+          Meet the faculty who teach and advise across the ICAS programmes.
+        </p>
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {faculty.map((f) => (
             <article
               key={f.name}
-              className="rounded-xl bg-card p-6 ring-1 ring-border"
+              className="rounded-xl bg-card p-6 border shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div>
