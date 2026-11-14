@@ -98,12 +98,10 @@ export const news = [
   {
     title: "ICAS (MAHE) launches 2+2 international pathways",
     summary: "Students can complete 2 years at Manipal and 2 years abroad.",
-    clip: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
   },
   {
     title: "Enigma wins National Robotics Meet",
     summary: "Robotics domain builds autonomous line‑follower bot.",
-    clip: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
   },
 ];
 
@@ -943,17 +941,6 @@ export const portalGrades = {
     { code: "ICS 233", grade: "A-" },
   ],
 };
-
-export const portalQuickLinks = [
-  { label: "Submit Assignment", href: "/portal#submit", variant: "default" },
-  { label: "Ask in Forum", href: "/portal#forum", variant: "outline" },
-  {
-    label: "Meet Link",
-    href: "https://meet.google.com/",
-    variant: "secondary",
-    external: true,
-  },
-];
 
 /** Demo-mode accounts (local evaluation only; see README). */
 export const portalUsers: StoredUser[] = [

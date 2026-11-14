@@ -1,4 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Loader2, MapPinOff } from "lucide-react";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 declare global {
   interface Window {
@@ -609,14 +611,50 @@ const universities = [
   },
 ];
 
+type Status = "idle" | "loading" | "ready" | "error";
+
+const TILE_URL = (dark: boolean) =>
+  `https://{s}.basemaps.cartocdn.com/${dark ? "dark_all" : "light_all"}/{z}/{x}/{y}{r}.png`;
+
+/**
+ * Interactive Leaflet map of partner universities. Leaflet is loaded from a
+ * CDN only when the map scrolls into view, so it does not slow the first load.
+ */
 export default function UniversityMap() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const tileLayerRef = useRef<any>(null);
+  const { theme } = useTheme();
+  const [visible, setVisible] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
+  const [attempt, setAttempt] = useState(0);
+
+  // Start loading only once the map is near the viewport.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (!("IntersectionObserver" in window)) {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "200px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!visible || !mapRef.current || mapInstanceRef.current) return;
+    setStatus("loading");
 
-    // Load Leaflet CSS and JS
     const link = document.createElement("link");
     link.rel = "stylesheet";
     link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
@@ -624,13 +662,16 @@ export default function UniversityMap() {
 
     const script = document.createElement("script");
     script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    script.onerror = () => setStatus("error");
     script.onload = () => {
-      if (!window.L || mapInstanceRef.current) return;
+      if (!window.L || !mapRef.current || mapInstanceRef.current) return;
 
-      const map = window.L.map(mapRef.current).setView([20, 0], 2);
+      const map = window.L.map(mapRef.current, {
+        scrollWheelZoom: false,
+      }).setView([25, 10], 2);
 
-      window.L.tileLayer(
-        "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+      tileLayerRef.current = window.L.tileLayer(
+        TILE_URL(document.documentElement.classList.contains("dark")),
         {
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>',
@@ -640,12 +681,13 @@ export default function UniversityMap() {
       ).addTo(map);
 
       universities.forEach((u) => {
-        window.L.marker([u.lat, u.lon])
+        window.L.marker([u.lat, u.lon], { title: u.name, alt: u.name })
           .addTo(map)
           .bindPopup(`<strong>${u.name}</strong><br>${u.location}`);
       });
 
       mapInstanceRef.current = map;
+      setStatus("ready");
     };
     document.head.appendChild(script);
 
@@ -657,15 +699,58 @@ export default function UniversityMap() {
         mapInstanceRef.current = null;
       }
     };
-  }, []);
+  }, [visible, attempt]);
+
+  // Keep the base map in step with the light/dark theme.
+  useEffect(() => {
+    tileLayerRef.current?.setUrl(TILE_URL(theme === "dark"));
+  }, [theme]);
 
   return (
-    <div className="rounded-xl overflow-hidden ring-1 ring-border bg-slate-900">
+    <div
+      ref={containerRef}
+      className="relative overflow-hidden rounded-xl border bg-muted"
+    >
       <div
         ref={mapRef}
-        className="h-96 w-full"
-        style={{ background: "#111" }}
+        role="region"
+        aria-label={`Map of ${universities.length} partner universities`}
+        className="h-80 w-full sm:h-96"
       />
+      {status !== "ready" && (
+        <div className="absolute inset-0 grid place-items-center p-6 text-center">
+          {status === "error" ? (
+            <div role="alert" className="max-w-sm">
+              <MapPinOff
+                className="mx-auto h-8 w-8 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <p className="mt-3 font-medium">The map could not be loaded.</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Check your connection. The full list of universities is below.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setStatus("idle");
+                  setAttempt((n) => n + 1);
+                }}
+                className="mt-4 inline-flex h-10 items-center rounded-md border bg-background px-4 text-sm font-medium hover:bg-muted"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <div
+              role="status"
+              className="flex items-center gap-2 text-sm text-muted-foreground"
+            >
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Loading map…
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
