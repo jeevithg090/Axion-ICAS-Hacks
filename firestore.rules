@@ -1,0 +1,121 @@
+rules_version = '2';
+
+// Security rules for the Cloud Firestore collections used by the client.
+// Deploy with: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function isAdmin() {
+      return signedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    function ownsNew(field) {
+      return signedIn() && request.resource.data[field] == request.auth.uid;
+    }
+    function ownsExisting(field) {
+      return signedIn() && resource.data[field] == request.auth.uid;
+    }
+
+    // User profiles. Self-registration is limited to the student role and a
+    // user can never change their own role; admins manage roles.
+    match /users/{uid} {
+      allow read: if isUser(uid) || isAdmin();
+      allow create: if isUser(uid) && request.resource.data.role == 'student';
+      allow update: if (isUser(uid) && request.resource.data.role == resource.data.role) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Per-user study centre (courses, syllabus, notes, uploads).
+    match /studyCentres/{uid}/{document=**} {
+      allow read, write: if isUser(uid);
+    }
+
+    match /academicPlans/{uid} {
+      allow read, write: if isUser(uid);
+    }
+
+    // Course catalogue: readable by students, maintained by admins.
+    match /courses/{courseId} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /transferProfiles/{uid} {
+      allow read, write: if isUser(uid) || isAdmin();
+    }
+
+    match /transferDocuments/{id} {
+      allow read: if ownsExisting('userId') || isAdmin();
+      allow create: if ownsNew('userId');
+      allow update: if (ownsExisting('userId') && ownsNew('userId')) || isAdmin();
+      allow delete: if ownsExisting('userId');
+    }
+
+    match /transferDeadlines/{id} {
+      allow read, delete: if ownsExisting('userId');
+      allow create: if ownsNew('userId');
+      allow update: if ownsExisting('userId') && ownsNew('userId');
+    }
+
+    match /transferTimeline/{id} {
+      allow read: if ownsExisting('userId');
+      allow create: if ownsNew('userId');
+    }
+
+    // Buddy (mentor/mentee) matching. Profiles are discoverable by signed-in users.
+    match /buddyProfiles/{id} {
+      allow read: if signedIn();
+      allow create: if ownsNew('userId');
+      allow update, delete: if ownsExisting('userId') && (request.method == 'delete' || ownsNew('userId'));
+    }
+
+    match /buddyMatches/{id} {
+      function isParticipant(data) {
+        return signedIn() && (data.mentorId == request.auth.uid || data.menteeId == request.auth.uid);
+      }
+      allow read: if isParticipant(resource.data);
+      allow create: if isParticipant(request.resource.data);
+      allow update: if isParticipant(resource.data) &&
+        request.resource.data.mentorId == resource.data.mentorId &&
+        request.resource.data.menteeId == resource.data.menteeId;
+    }
+
+    match /buddyMessages/{id} {
+      function inMatch(matchId) {
+        let m = get(/databases/$(database)/documents/buddyMatches/$(matchId)).data;
+        return signedIn() && (m.mentorId == request.auth.uid || m.menteeId == request.auth.uid);
+      }
+      allow read: if inMatch(resource.data.matchId);
+      allow create: if ownsNew('senderId') && inMatch(request.resource.data.matchId);
+      allow update: if inMatch(resource.data.matchId) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+    }
+
+    // Research hub. Projects are public to signed-in users; creators manage them.
+    match /researchProjects/{id} {
+      allow read: if signedIn();
+      allow create: if ownsNew('creatorId');
+      allow update: if ownsExisting('creatorId') && ownsNew('creatorId');
+      allow delete: if ownsExisting('creatorId') || isAdmin();
+    }
+
+    match /projectApplications/{id} {
+      function projectOwner(projectId) {
+        return get(/databases/$(database)/documents/researchProjects/$(projectId)).data.creatorId == request.auth.uid;
+      }
+      allow read: if ownsExisting('applicantId') || (signedIn() && projectOwner(resource.data.projectId));
+      allow create: if ownsNew('applicantId') && request.resource.data.status == 'pending';
+      allow update: if signedIn() && projectOwner(resource.data.projectId);
+    }
+
+    match /projectUpdates/{id} {
+      allow read: if signedIn();
+      allow create: if ownsNew('authorId');
+    }
+  }
+}
