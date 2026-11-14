@@ -1,4 +1,9 @@
-export type Submission = { assignmentId: string; url?: string; notes?: string; submittedAt: string };
+export type Submission = {
+  assignmentId: string;
+  url?: string;
+  notes?: string;
+  submittedAt: string;
+};
 const KEY = "icas_submissions";
 
 export function getSubmissions(): Record<string, Submission> {

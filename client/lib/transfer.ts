@@ -54,7 +54,9 @@ export function loadTransferProfile(): TransferProfile {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) return JSON.parse(raw) as TransferProfile;
-  } catch {}
+  } catch {
+    // Corrupt or unavailable storage: start from the default profile.
+  }
   const initial: TransferProfile = {
     stage: "application_submitted",
     gpa: 8.2,

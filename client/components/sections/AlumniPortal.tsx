@@ -3,7 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { alumni, alumniOpportunities, alumniStories, programs, contacts } from "@/data/sample";
+import {
+  alumni,
+  alumniOpportunities,
+  alumniStories,
+  programs,
+  contacts,
+} from "@/data/sample";
 
 function initials(name: string) {
   const parts = name.split(" ").filter(Boolean);
@@ -23,11 +29,15 @@ export default function AlumniPortal() {
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Alumni Portal</h2>
-          <p className="text-sm text-muted-foreground">Directory, stories, and opportunities for our alumni community.</p>
+          <p className="text-sm text-muted-foreground">
+            Directory, stories, and opportunities for our alumni community.
+          </p>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline">
-            <a href={`mailto:${contacts.email}?subject=Alumni%20Mentorship`}>Become a mentor</a>
+            <a href={`mailto:${contacts.email}?subject=Alumni%20Mentorship`}>
+              Become a mentor
+            </a>
           </Button>
           <Button asChild>
             <a href="/Contact">Share your story</a>
@@ -54,12 +64,26 @@ export default function AlumniPortal() {
             </CardHeader>
             <CardContent className="flex items-center justify-between pt-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className={cn(a.programId === "cse" && "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100", a.programId === "aero" && "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-100", a.programId === "mechatronics" && "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-100")}>{a.programId.toUpperCase()}</Badge>
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    a.programId === "cse" &&
+                      "bg-blue-100 text-blue-900 dark:bg-blue-900/30 dark:text-blue-100",
+                    a.programId === "aero" &&
+                      "bg-purple-100 text-purple-900 dark:bg-purple-900/30 dark:text-purple-100",
+                    a.programId === "mechatronics" &&
+                      "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/30 dark:text-emerald-100",
+                  )}
+                >
+                  {a.programId.toUpperCase()}
+                </Badge>
                 {a.location && <Badge variant="outline">{a.location}</Badge>}
               </div>
               {a.linkedin && (
                 <Button asChild size="sm" variant="ghost">
-                  <a href={a.linkedin} target="_blank" rel="noreferrer">LinkedIn</a>
+                  <a href={a.linkedin} target="_blank" rel="noreferrer">
+                    LinkedIn
+                  </a>
                 </Button>
               )}
             </CardContent>
@@ -75,8 +99,12 @@ export default function AlumniPortal() {
           <CardContent className="grid gap-4">
             {alumniStories.map((s, idx) => (
               <figure key={idx} className="rounded-md border p-4">
-                <blockquote className="text-sm leading-relaxed">“{s.quote}”</blockquote>
-                <figcaption className="mt-2 text-xs text-muted-foreground">— {s.name}, {s.role} at {s.company}</figcaption>
+                <blockquote className="text-sm leading-relaxed">
+                  “{s.quote}”
+                </blockquote>
+                <figcaption className="mt-2 text-xs text-muted-foreground">
+                  — {s.name}, {s.role} at {s.company}
+                </figcaption>
               </figure>
             ))}
           </CardContent>
@@ -88,14 +116,21 @@ export default function AlumniPortal() {
           </CardHeader>
           <CardContent className="grid gap-3">
             {alumniOpportunities.map((o, idx) => (
-              <div key={idx} className="flex items-start justify-between gap-4 rounded-md border p-4">
+              <div
+                key={idx}
+                className="flex items-start justify-between gap-4 rounded-md border p-4"
+              >
                 <div>
                   <div className="text-sm font-medium">{o.title}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">{o.org} · {o.location}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {o.org} · {o.location}
+                  </div>
                 </div>
                 {o.link && (
                   <Button asChild size="sm" variant="outline">
-                    <a href={o.link} target="_blank" rel="noreferrer">View</a>
+                    <a href={o.link} target="_blank" rel="noreferrer">
+                      View
+                    </a>
                   </Button>
                 )}
               </div>

@@ -7,7 +7,9 @@ export default function SiteLayout({ children }: PropsWithChildren) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Header />
-      <div id="main" className="relative">{children}</div>
+      <div id="main" className="relative">
+        {children}
+      </div>
       <Footer />
       <AiNavBot />
     </div>

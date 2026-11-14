@@ -35,23 +35,33 @@ export default function Timetable() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold tracking-tight">Class Timetable</h2>
         <div className="flex items-center gap-2 text-sm">
-          <span className="rounded-md border px-2 py-1">{timetableMeta.semester}</span>
-          <span className="rounded-md border px-2 py-1">{timetableMeta.program}</span>
+          <span className="rounded-md border px-2 py-1">
+            {timetableMeta.semester}
+          </span>
+          <span className="rounded-md border px-2 py-1">
+            {timetableMeta.program}
+          </span>
         </div>
       </div>
 
       <Card className="mt-6 overflow-hidden">
         <div
           className="grid"
-          style={{ gridTemplateColumns: `80px repeat(${days.length}, minmax(0,1fr))` }}
+          style={{
+            gridTemplateColumns: `80px repeat(${days.length}, minmax(0,1fr))`,
+          }}
         >
           <div className="bg-muted/40">
             <div className="sticky top-0 z-10 border-b bg-muted/50 p-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               Time
             </div>
             <div style={{ height }} className="relative">
-              {HOURS.map((h, i) => (
-                <div key={h.value} className="relative" style={{ height: HOUR_HEIGHT }}>
+              {HOURS.map((h) => (
+                <div
+                  key={h.value}
+                  className="relative"
+                  style={{ height: HOUR_HEIGHT }}
+                >
                   <div className="absolute inset-y-0 right-2 flex items-start pt-1 text-xs text-muted-foreground">
                     {h.label}
                   </div>
@@ -70,7 +80,10 @@ export default function Timetable() {
                 {HOURS.map((h, i) => (
                   <div
                     key={h.value}
-                    className={cn("absolute left-0 right-0 border-t", i === 0 && "border-t-0")}
+                    className={cn(
+                      "absolute left-0 right-0 border-t",
+                      i === 0 && "border-t-0",
+                    )}
                     style={{ top: i * HOUR_HEIGHT }}
                   />
                 ))}
@@ -78,8 +91,10 @@ export default function Timetable() {
                 {timetableSlots
                   .filter((s) => s.day === day)
                   .map((s, idx) => {
-                    const top = (minutesSince(DAY_START, s.start) / 60) * HOUR_HEIGHT;
-                    const heightPx = (minutesSince(s.start, s.end) / 60) * HOUR_HEIGHT;
+                    const top =
+                      (minutesSince(DAY_START, s.start) / 60) * HOUR_HEIGHT;
+                    const heightPx =
+                      (minutesSince(s.start, s.end) / 60) * HOUR_HEIGHT;
                     return (
                       <div
                         key={idx}
@@ -92,10 +107,16 @@ export default function Timetable() {
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-semibold">{s.course}</span>
-                          {s.room && <span className="ml-2 rounded bg-white/20 px-1.5 py-0.5 text-[10px]">{s.room}</span>}
+                          {s.room && (
+                            <span className="ml-2 rounded bg-white/20 px-1.5 py-0.5 text-[10px]">
+                              {s.room}
+                            </span>
+                          )}
                         </div>
                         <div className="mt-0.5 opacity-90">{s.code}</div>
-                        <div className="opacity-90">{s.start} – {s.end}</div>
+                        <div className="opacity-90">
+                          {s.start} – {s.end}
+                        </div>
                       </div>
                     );
                   })}
