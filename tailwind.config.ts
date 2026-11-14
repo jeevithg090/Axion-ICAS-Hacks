@@ -1,3 +1,4 @@
+import animate from "tailwindcss-animate";
 import type { Config } from "tailwindcss";
 
 export default {
@@ -71,7 +72,22 @@ export default {
         },
       },
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Ubuntu", "Cantarell", "Noto Sans", "Helvetica Neue", "Arial", "\"Apple Color Emoji\"", "\"Segoe UI Emoji\"", "\"Segoe UI Symbol\""],
+        sans: [
+          "Inter",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "Segoe UI",
+          "Roboto",
+          "Ubuntu",
+          "Cantarell",
+          "Noto Sans",
+          "Helvetica Neue",
+          "Arial",
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+        ],
         display: ["Inter", "ui-sans-serif", "system-ui"],
       },
       boxShadow: {
@@ -104,5 +120,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [animate],
 } satisfies Config;
