@@ -129,14 +129,16 @@ export default function DelegateSessionsSummary() {
         headers: {
           "Content-Type": file.type || "application/octet-stream",
           "x-filename": file.name || "meeting.audio",
-        } as any,
+        },
         body: buf,
       });
       const raw = await resp.text();
       let parsed: any = null;
       try {
         parsed = raw ? JSON.parse(raw) : null;
-      } catch {}
+      } catch {
+        // Non-JSON error body; fall back to the raw text below.
+      }
       if (!resp.ok) {
         const msg = parsed?.error || raw || `Request failed: ${resp.status}`;
         throw new Error(msg);
